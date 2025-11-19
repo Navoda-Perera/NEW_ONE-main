@@ -23,11 +23,6 @@
             <li><a class="dropdown-item" href="{{ route('pm.items.pending') }}">All Pending Items</a></li>
         </ul>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('pm.bulk-upload') }}">
-            <i class="bi bi-cloud-upload"></i> Bulk Upload
-        </a>
-    </li>
 @endsection
 
 @section('breadcrumb')

@@ -125,7 +125,6 @@ Route::prefix('pm')->name('pm.')->group(function () {
         Route::post('/items/{id}/quick-accept', [PMItemController::class, 'quickAccept'])->name('items.quick-accept');
         Route::post('/items/{id}/reject', [PMItemController::class, 'reject'])->name('items.reject');
         Route::post('/items/{id}/update-barcode', [PMItemController::class, 'updateBarcode'])->name('items.update-barcode');
-        Route::post('/bulk-upload/{id}/accept-all', [PMItemController::class, 'acceptBulkUploadCompletely'])->name('bulk-upload.accept-all');
 
         // Customer uploads management
         Route::get('/customer-uploads', [PMDashboardController::class, 'customerUploads'])->name('customer-uploads');
@@ -134,11 +133,6 @@ Route::prefix('pm')->name('pm.')->group(function () {
         Route::get('/customer-upload/{id}/print-receipt', [PMDashboardController::class, 'printCustomerUploadReceipt'])->name('print-customer-upload-receipt');
         Route::post('/accept-all-upload/{id}', [PMDashboardController::class, 'acceptAllUpload'])->name('accept-all-upload');
         Route::post('/accept-selected-upload/{id}', [PMDashboardController::class, 'acceptSelectedUpload'])->name('accept-selected-upload');
-
-        // PM Bulk Upload (goes directly to items/item_bulk tables)
-        Route::get('/bulk-upload', [PMDashboardController::class, 'bulkUpload'])->name('bulk-upload');
-        Route::post('/bulk-upload', [PMDashboardController::class, 'storeBulkUpload'])->name('store-bulk-upload');
-        Route::get('/bulk-upload/template', [PMDashboardController::class, 'showBulkUploadTemplate'])->name('bulk-upload.template');
 
         // Single Item Management
         Route::prefix('single-item')->name('single-item.')->group(function () {

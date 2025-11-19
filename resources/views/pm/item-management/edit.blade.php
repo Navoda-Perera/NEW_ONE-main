@@ -19,13 +19,8 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link active" href="{{ route('pm.item-management.index') }}">
-            <i class="bi bi-search"></i> Item Management
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('pm.bulk-upload') }}">
-            <i class="bi bi-cloud-upload"></i> Bulk Upload
+        <a class="nav-link" href="{{ route('pm.single-item.index') }}">
+            <i class="bi bi-box-seam"></i> Add Single Item
         </a>
     </li>
 @endsection

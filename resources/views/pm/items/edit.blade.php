@@ -18,11 +18,6 @@
             <i class="bi bi-box-seam"></i> Add Single Item
         </a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{{ route('pm.bulk-upload') }}">
-            <i class="bi bi-cloud-upload"></i> Bulk Upload
-        </a>
-    </li>
 @endsection
 
 @section('content')

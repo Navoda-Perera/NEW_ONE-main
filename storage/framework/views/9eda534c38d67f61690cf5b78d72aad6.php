@@ -111,13 +111,6 @@
         </div>
 
         <div class="col-xl-3 col-md-6">
-            <a href="<?php echo e(route('pm.bulk-upload')); ?>" class="action-btn">
-                <i class="bi bi-cloud-upload"></i>
-                <span>Bulk Upload</span>
-            </a>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
             <a href="<?php echo e(route('pm.item-management.index')); ?>" class="action-btn">
                 <i class="bi bi-search"></i>
                 <span>Item Management</span>

@@ -596,13 +596,6 @@
             </div>
 
             <div class="nav-item">
-                <a href="{{ route('pm.bulk-upload') }}" class="nav-link {{ request()->routeIs('pm.bulk-upload') ? 'active' : '' }}">
-                    <i class="bi bi-cloud-upload"></i>
-                    <span>Bulk Upload</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
                 <a href="{{ route('pm.customer-uploads') }}" class="nav-link {{ request()->routeIs('pm.customer-uploads') ? 'active' : '' }}">
                     <i class="bi bi-inbox"></i>
                     <span>Customer Uploads</span>
