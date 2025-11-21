@@ -1,0 +1,441 @@
+<?php
+
+namespace App\Http\Controllers\PM;
+
+use App\Http\Controllers\Controller;
+use App\Models\Item;
+use App\Models\ItemBulk;
+use App\Models\Receipt;
+use App\Models\SlpPricing;
+use App\Models\PostPricing;
+use App\Models\Location;
+use App\Models\SmsSent;
+use App\Models\Company;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class PMBulkUploadController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::guard('pm')->user();
+        $companies = Company::where('status', 'ACTIVE')
+            ->where('assign_postoffice', $user->location_id)
+            ->get();
+
+        return view('pm.bulk-upload.index', [
+            'user' => $user,
+            'location' => $user->location,
+            'companies' => $companies
+        ]);
+    }
+
+    public function showSLPForm()
+    {
+        $user = Auth::guard('pm')->user();
+        $companies = Company::where('status', 'ACTIVE')
+            ->where('assign_postoffice', $user->location_id)
+            ->get();
+
+        return view('pm.bulk-upload.slp-form', [
+            'user' => $user,
+            'location' => $user->location,
+            'companies' => $companies
+        ]);
+    }
+
+    public function showCODForm()
+    {
+        $user = Auth::guard('pm')->user();
+        $companies = Company::where('status', 'ACTIVE')
+            ->where('assign_postoffice', $user->location_id)
+            ->get();
+
+        return view('pm.bulk-upload.cod-form', [
+            'user' => $user,
+            'location' => $user->location,
+            'companies' => $companies
+        ]);
+    }
+
+    public function showRegisterForm()
+    {
+        $user = Auth::guard('pm')->user();
+        $companies = Company::where('status', 'ACTIVE')
+            ->where('assign_postoffice', $user->location_id)
+            ->get();
+
+        return view('pm.bulk-upload.register-form', [
+            'user' => $user,
+            'location' => $user->location,
+            'companies' => $companies
+        ]);
+    }
+
+    public function downloadTemplate($service)
+    {
+        // Define headers based on service type
+        switch ($service) {
+            case 'slp':
+                $headers = [
+                    'Barcode',
+                    'Receiver Name',
+                    'Mobile',
+                    'Address',
+                    'Delivery Post Office',
+                    'Weight (grams)',
+                    'Amount'
+                ];
+                $fileName = 'SLP_Bulk_Upload_Template.csv';
+                break;
+            case 'cod':
+                $headers = [
+                    'Barcode',
+                    'Receiver Name',
+                    'Mobile',
+                    'Address',
+                    'Delivery Post Office',
+                    'Weight (grams)',
+                    'COD Amount'
+                ];
+                $fileName = 'COD_Bulk_Upload_Template.csv';
+                break;
+            case 'register':
+                $headers = [
+                    'Barcode',
+                    'Receiver Name',
+                    'Mobile',
+                    'Address',
+                    'Delivery Post Office',
+                    'Weight (grams)',
+                    'Amount'
+                ];
+                $fileName = 'Register_Post_Bulk_Upload_Template.csv';
+                break;
+            default:
+                abort(404);
+        }
+
+        return response()->streamDownload(function () use ($headers) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $headers);
+            fclose($file);
+        }, $fileName, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    public function uploadSLP(Request $request)
+    {
+        return $this->processUpload($request, 'slp_courier');
+    }
+
+    public function uploadCOD(Request $request)
+    {
+        return $this->processUpload($request, 'cod');
+    }
+
+    public function uploadRegister(Request $request)
+    {
+        return $this->processUpload($request, 'register_post');
+    }
+
+    private function processUpload(Request $request, $serviceType)
+    {
+        $request->validate([
+            'company_id' => 'required|exists:companies,id',
+            'sender_name' => 'required|string|max:255',
+            'sender_mobile' => 'required|string|max:15',
+            'csv_file' => 'required|file|mimes:csv,txt|max:5120'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $user = Auth::guard('pm')->user();
+            $file = $request->file('csv_file');
+
+            // Read CSV file with better encoding handling
+            $fileContent = file_get_contents($file->getPathname());
+            
+            // Convert to UTF-8 if needed
+            if (!mb_check_encoding($fileContent, 'UTF-8')) {
+                $fileContent = mb_convert_encoding($fileContent, 'UTF-8', 'auto');
+            }
+            
+            // Parse CSV data
+            $csvData = array_map('str_getcsv', explode("\n", $fileContent));
+            
+            // Remove empty lines and header row
+            $csvData = array_filter($csvData, function($row) {
+                return !empty($row) && count($row) > 1;
+            });
+            
+            $headers = array_shift($csvData);
+            $items = [];
+            $errors = [];
+            
+            // Validate CSV structure
+            if (empty($csvData)) {
+                DB::rollBack();
+                return redirect()->back()
+                    ->withErrors(['csv_file' => 'CSV file is empty or has no valid data rows'])
+                    ->withInput();
+            }
+
+            // Create ItemBulk record
+            $itemBulk = ItemBulk::create([
+                'company_id' => $request->company_id,
+                'sender_name' => $request->sender_name,
+                'service_type' => $serviceType,
+                'location_id' => $user->location_id,
+                'created_by' => $user->id,
+                'category' => 'bulk_list',
+                'item_quantity' => 0 // Will be updated later
+            ]);
+
+            foreach ($csvData as $index => $row) {
+                $rowNumber = $index + 2; // +2 because we removed header and array is 0-indexed
+
+                // Skip completely empty rows
+                if (empty(array_filter($row, function($value) {
+                    return !is_null($value) && trim($value) !== '';
+                }))) {
+                    continue;
+                }
+
+                // Ensure row has minimum required columns
+                while (count($row) < 7) {
+                    $row[] = '';
+                }
+
+                // Trim all values and validate required fields
+                $row = array_map(function($value) { 
+                    return is_string($value) ? trim($value) : $value; 
+                }, $row);
+                
+                // Extract and validate fields
+                $barcode = $row[0] ?? '';
+                $receiverName = $row[1] ?? '';
+                $receiverMobile = $row[2] ?? '';
+                $address = $row[3] ?? '';
+                $postOffice = $row[4] ?? '';
+                $weight = $row[5] ?? '';
+                $amount = $row[6] ?? '';
+                
+                // Validate required fields
+                if (empty($receiverName)) {
+                    $errors[] = "Row {$rowNumber}: Receiver Name is required";
+                    continue;
+                }
+                
+                if (empty($receiverMobile)) {
+                    $errors[] = "Row {$rowNumber}: Mobile number is required";
+                    continue;
+                }
+                
+                // Validate mobile number format (basic validation)
+                $cleanMobile = preg_replace('/[^0-9]/', '', $receiverMobile);
+                if (strlen($cleanMobile) < 9 || strlen($cleanMobile) > 15) {
+                    $errors[] = "Row {$rowNumber}: Invalid mobile number format (should be 9-15 digits)";
+                    continue;
+                
+                if (empty($weight) || !is_numeric($weight) || (float)$weight <= 0) {
+                    $errors[] = "Row {$rowNumber}: Weight must be a valid positive number";
+                    continue;
+                }
+
+                // Additional validation for COD amounts
+                if ($serviceType === 'cod') {
+                    if (empty($amount) || !is_numeric($amount) || (float)$amount <= 0) {
+                        $errors[] = "Row {$rowNumber}: COD Amount must be a valid positive number";
+                        continue;
+                    }
+                }
+
+                // Validate address is provided
+                if (empty($address)) {
+                    $errors[] = "Row {$rowNumber}: Address is required";
+                    continue;
+                }
+
+                // Calculate postage
+                $weight = (float) $weight;
+                $postage = $this->calculatePostageForService($serviceType, $weight);
+                $amount = (float) ($amount ?: 0);
+                $totalAmount = ($serviceType === 'cod') ? $amount : ($amount + $postage);
+
+                // Generate barcode if not provided
+                if (empty($barcode)) {
+                    $barcode = 'BU' . str_pad($itemBulk->id, 4, '0', STR_PAD_LEFT) . str_pad(count($items) + 1, 4, '0', STR_PAD_LEFT);
+                }
+
+                // Create Item record
+                $item = Item::create([
+                    'barcode' => $barcode,
+                    'receiver_name' => $receiverName,
+                    'receiver_address' => $address,
+                    'weight' => $weight,
+                    'amount' => $totalAmount,
+                    'status' => 'accept',
+                    'created_by' => $user->id,
+                    'item_bulk_id' => $itemBulk->id
+                ]);
+
+                // Create SMS record
+                SmsSent::create([
+                    'item_id' => $item->id,
+                    'sender_mobile' => $request->sender_mobile,
+                    'receiver_mobile' => $receiverMobile,
+                    'status' => 'accept'
+                ]);
+
+                $items[] = $item;
+            }
+
+            if (empty($items) && !empty($errors)) {
+                DB::rollBack();
+                return redirect()->back()
+                    ->withErrors(['upload' => 'No valid items found in the uploaded file.'])
+                    ->withInput();
+            }
+
+            // Update item quantity
+            $itemBulk->update(['item_quantity' => count($items)]);
+
+            DB::commit();
+
+            return redirect()->back()
+                ->with('success', 'Bulk upload completed successfully! ' . count($items) . ' items uploaded.')
+                ->with('uploaded_items', $items)
+                ->with('bulk_id', $itemBulk->id)
+                ->with('upload_errors', $errors);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors(['upload' => 'Error processing file: ' . $e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    private function calculatePostageForService($serviceType, $weight)
+    {
+        switch ($serviceType) {
+            case 'slp_courier':
+                $pricing = SlpPricing::where('weight_from', '<=', $weight)
+                    ->where('weight_to', '>=', $weight)
+                    ->where('is_active', true)
+                    ->first();
+                return $pricing ? $pricing->price : 0;
+
+            case 'register_post':
+                $pricing = PostPricing::where('service_type', 'register')
+                    ->where('min_weight', '<=', $weight)
+                    ->where('max_weight', '>=', $weight)
+                    ->first();
+                return $pricing ? $pricing->price : 0;
+
+            case 'cod':
+                $pricing = PostPricing::where('service_type', 'register')
+                    ->where('min_weight', '<=', $weight)
+                    ->where('max_weight', '>=', $weight)
+                    ->first();
+                return $pricing ? $pricing->price : 0;
+
+            default:
+                return 0;
+        }
+    }
+
+    public function removeItem($id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $item = Item::findOrFail($id);
+            $itemBulk = $item->itemBulk;
+
+            // Delete related SMS records
+            SmsSent::where('item_id', $item->id)->delete();
+
+            // Delete the item
+            $item->delete();
+
+            // Update item quantity
+            $remaining = Item::where('item_bulk_id', $itemBulk->id)->count();
+            $itemBulk->update(['item_quantity' => $remaining]);
+
+            // If no items left, delete the bulk record
+            if ($remaining == 0) {
+                $itemBulk->delete();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Item removed successfully'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error removing item: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function processBulk($bulkId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $user = Auth::guard('pm')->user();
+            $itemBulk = ItemBulk::with('items')->findOrFail($bulkId);
+
+            if ($itemBulk->items->isEmpty()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No items to process'
+                ], 400);
+            }
+
+            // Calculate total amount
+            $totalAmount = $itemBulk->items->sum('amount');
+
+            // Create receipt
+            $receipt = Receipt::create([
+                'item_quantity' => $itemBulk->item_quantity,
+                'item_bulk_id' => $itemBulk->id,
+                'amount' => $totalAmount,
+                'postage' => 0, // Postage is already included in item amount
+                'total_amount' => $totalAmount,
+                'company_id' => null, // Can be set based on form selection
+                'passcode' => strtoupper(Str::random(6)),
+                'payment_type' => 'cash', // Default, can be changed based on requirements
+                'created_by' => $user->id,
+                'location_id' => $user->location_id
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Bulk upload processed successfully!',
+                'receipt_id' => $receipt->id
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing bulk upload: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+}

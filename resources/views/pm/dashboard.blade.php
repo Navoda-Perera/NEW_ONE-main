@@ -60,6 +60,9 @@
                         <a href="{{ route('pm.single-item.index') }}" class="list-group-item list-group-item-action">
                             <i class="bi bi-box-seam me-2"></i>Add Single Item
                         </a>
+                        <a href="{{ route('pm.bulk-upload.index') }}" class="list-group-item list-group-item-action">
+                            <i class="bi bi-cloud-upload me-2"></i>Bulk Upload
+                        </a>
                         <a href="{{ route('pm.item-management.index') }}" class="list-group-item list-group-item-action">
                             <i class="bi bi-search me-2"></i>Item Management
                         </a>

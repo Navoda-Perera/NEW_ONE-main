@@ -11,6 +11,7 @@ class Withdraw extends Model
         'company_id',
         'amount',
         'location_id',
+        'description',
         'item_id',
         'created_by',
     ];

@@ -362,31 +362,6 @@ tr.selected {
     opacity: 0.6;
     cursor: not-allowed;
 }
-
-/* Custom table responsive styling */
-.table-responsive {
-    max-height: 70vh;
-    border-radius: 0.375rem;
-}
-
-.table-responsive::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 4px;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-    background: #555;
-}
 </style>
 
 <script>

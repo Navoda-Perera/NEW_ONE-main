@@ -11,6 +11,7 @@ class Deposit extends Model
         'company_id',
         'amount',
         'location_id',
+        'description',
         'created_by',
     ];
 

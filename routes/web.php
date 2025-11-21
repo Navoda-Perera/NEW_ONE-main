@@ -10,7 +10,8 @@ use App\Http\Controllers\PM\PMAuthController;
 use App\Http\Controllers\PM\PMDashboardController;
 use App\Http\Controllers\PM\PMItemController;
 use App\Http\Controllers\PM\PMSingleItemController;
-use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\PM\PMBulkUploadController;
+use App\Http\Controllers\PM\CompanyController;
 // use App\Http\Controllers\DeliveryController; // Temporarily commented out
 // use App\Http\Controllers\DispatchController; // Temporarily commented out
 // use App\Http\Controllers\PaymentController; // Temporarily commented out
@@ -148,6 +149,20 @@ Route::prefix('pm')->name('pm.')->group(function () {
             Route::get('/print-receipt/{id}', [PMSingleItemController::class, 'printReceipt'])->name('print-receipt');
         });
 
+        // Bulk Upload Management
+        Route::prefix('bulk-upload')->name('bulk-upload.')->group(function () {
+            Route::get('/', [PMBulkUploadController::class, 'index'])->name('index');
+            Route::get('/slp-form', [PMBulkUploadController::class, 'showSLPForm'])->name('slp-form');
+            Route::get('/cod-form', [PMBulkUploadController::class, 'showCODForm'])->name('cod-form');
+            Route::get('/register-form', [PMBulkUploadController::class, 'showRegisterForm'])->name('register-form');
+            Route::post('/upload-slp', [PMBulkUploadController::class, 'uploadSLP'])->name('upload-slp');
+            Route::post('/upload-cod', [PMBulkUploadController::class, 'uploadCOD'])->name('upload-cod');
+            Route::post('/upload-register', [PMBulkUploadController::class, 'uploadRegister'])->name('upload-register');
+            Route::get('/template/{service}', [PMBulkUploadController::class, 'downloadTemplate'])->name('template');
+            Route::delete('/remove-item/{id}', [PMBulkUploadController::class, 'removeItem'])->name('remove-item');
+            Route::post('/process-bulk/{bulkId}', [PMBulkUploadController::class, 'processBulk'])->name('process-bulk');
+        });
+
         // Item Management with Barcode Scanning
         Route::prefix('item-management')->name('item-management.')->group(function () {
             Route::get('/', [PMItemController::class, 'management'])->name('index');
@@ -158,8 +173,18 @@ Route::prefix('pm')->name('pm.')->group(function () {
             Route::get('/items/list', [PMItemController::class, 'itemsList'])->name('items.list');
         });
 
-        // Company management routes
-        Route::resource('companies', CompanyController::class);
+        // Companies management routes
+        Route::prefix('companies')->name('companies.')->group(function () {
+            Route::get('/', [CompanyController::class, 'index'])->name('index');
+            Route::get('/create', [CompanyController::class, 'create'])->name('create');
+            Route::post('/', [CompanyController::class, 'store'])->name('store');
+            Route::get('/{company}', [CompanyController::class, 'show'])->name('show');
+            Route::get('/{company}/edit', [CompanyController::class, 'edit'])->name('edit');
+            Route::put('/{company}', [CompanyController::class, 'update'])->name('update');
+            Route::delete('/{company}', [CompanyController::class, 'destroy'])->name('destroy');
+            Route::post('/{company}/add-balance', [CompanyController::class, 'addBalance'])->name('add-balance');
+            Route::post('/{company}/deduct-balance', [CompanyController::class, 'deductBalance'])->name('deduct-balance');
+        });
 
         // Delivery management routes (temporarily commented out)
         // Route::resource('deliveries', DeliveryController::class);
