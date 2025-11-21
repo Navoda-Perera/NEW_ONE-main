@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Edit Company'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -51,7 +49,7 @@
                 <form method="POST" action="<?php echo e(route('pm.companies.update', $company)); ?>" id="editCompanyForm">
                     <?php echo csrf_field(); ?>
                     <?php echo method_field('PUT'); ?>
-                    
+
                     <div class="row">
                         <!-- Company Name -->
                         <div class="col-md-6 mb-3">
@@ -66,7 +64,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
+unset($__errorArgs, $__bag); ?>"
                                    id="name" name="name" value="<?php echo e(old('name', $company->name)); ?>" required>
                             <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -93,7 +91,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
+unset($__errorArgs, $__bag); ?>"
                                    id="telephone" name="telephone" value="<?php echo e(old('telephone', $company->telephone)); ?>" required>
                             <?php $__errorArgs = ['telephone'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -120,7 +118,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
+unset($__errorArgs, $__bag); ?>"
                                    id="email" name="email" value="<?php echo e(old('email', $company->email)); ?>">
                             <?php $__errorArgs = ['email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -221,11 +219,11 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
+unset($__errorArgs, $__bag); ?>"
                                     id="assign_postoffice" name="assign_postoffice" required>
                                 <option value="">Select Post Office...</option>
                                 <?php $__currentLoopData = $postoffices; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $postoffice): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($postoffice->id); ?>" 
+                                    <option value="<?php echo e($postoffice->id); ?>"
                                             <?php echo e(old('assign_postoffice', $company->assign_postoffice) == $postoffice->id ? 'selected' : ''); ?>>
                                         <?php echo e($postoffice->name); ?>
 
@@ -257,7 +255,7 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
+unset($__errorArgs, $__bag); ?>"
                                       id="address" name="address" rows="3" required><?php echo e(old('address', $company->address)); ?></textarea>
                             <?php $__errorArgs = ['address'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -341,7 +339,7 @@ unset($__errorArgs, $__bag); ?>
                             Permanently delete this company. This action cannot be undone.
                         </p>
                     </div>
-                    <form method="POST" action="<?php echo e(route('pm.companies.destroy', $company)); ?>" 
+                    <form method="POST" action="<?php echo e(route('pm.companies.destroy', $company)); ?>"
                           onsubmit="return confirm('Are you sure you want to delete this company? This action cannot be undone.')">
                         <?php echo csrf_field(); ?>
                         <?php echo method_field('DELETE'); ?>
@@ -360,7 +358,7 @@ unset($__errorArgs, $__bag); ?>
 document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const form = document.getElementById('editCompanyForm');
-    
+
     form.addEventListener('submit', function(e) {
         const name = document.getElementById('name').value.trim();
         const telephone = document.getElementById('telephone').value.trim();
@@ -368,14 +366,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const type = document.getElementById('type').value;
         const status = document.getElementById('status').value;
         const postoffice = document.getElementById('assign_postoffice').value;
-        
+
         if (!name || !telephone || !address || !type || !status || !postoffice) {
             e.preventDefault();
             alert('Please fill in all required fields.');
             return false;
         }
     });
-    
+
     // Telephone validation
     const telephoneInput = document.getElementById('telephone');
     telephoneInput.addEventListener('input', function(e) {
@@ -386,4 +384,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/companies/edit.blade.php ENDPATH**/ ?>

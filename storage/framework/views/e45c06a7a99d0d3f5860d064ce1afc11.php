@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Companies Management'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -67,11 +65,11 @@
                                 <span class="input-group-text bg-light border-end-0">
                                     <i class="bi bi-search text-muted"></i>
                                 </span>
-                                <input 
-                                    type="text" 
-                                    name="search" 
-                                    class="form-control border-start-0" 
-                                    placeholder="Search companies..." 
+                                <input
+                                    type="text"
+                                    name="search"
+                                    class="form-control border-start-0"
+                                    placeholder="Search companies..."
                                     value="<?php echo e(request('search')); ?>"
                                     autocomplete="off"
                                 >
@@ -89,7 +87,7 @@
                         </form>
                     </div>
                 </div>
-                
+
                 <!-- Advanced Filters -->
                 <div class="row mt-3">
                     <div class="col-12">
@@ -97,7 +95,7 @@
                             <?php if(request('search')): ?>
                                 <input type="hidden" name="search" value="<?php echo e(request('search')); ?>">
                             <?php endif; ?>
-                            
+
                             <div class="filter-group">
                                 <label class="form-label small text-muted mb-1">Type:</label>
                                 <select name="type" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
@@ -108,7 +106,7 @@
                                     <option value="prepaid" <?php echo e(request('type') === 'prepaid' ? 'selected' : ''); ?>>Prepaid</option>
                                 </select>
                             </div>
-                            
+
                             <div class="filter-group">
                                 <label class="form-label small text-muted mb-1">Status:</label>
                                 <select name="status" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
@@ -117,7 +115,7 @@
                                     <option value="INACTIVE" <?php echo e(request('status') === 'INACTIVE' ? 'selected' : ''); ?>>Inactive</option>
                                 </select>
                             </div>
-                            
+
                             <?php if(request()->hasAny(['search', 'type', 'status'])): ?>
                                 <a href="<?php echo e(route('pm.companies.index')); ?>" class="btn btn-outline-secondary btn-sm">
                                     <i class="bi bi-arrow-clockwise me-1"></i>
@@ -127,7 +125,7 @@
                         </form>
                     </div>
                 </div>
-                
+
                 <?php if(request()->hasAny(['search', 'type', 'status'])): ?>
                     <div class="mt-2">
                         <small class="text-muted">
@@ -165,7 +163,7 @@
                                     </td>
                                     <td><?php echo e($company->telephone); ?></td>
                                     <td>
-                                        <span class="badge 
+                                        <span class="badge
                                             <?php if($company->type === 'cash'): ?> bg-success
                                             <?php elseif($company->type === 'credit'): ?> bg-warning text-dark
                                             <?php elseif($company->type === 'franking'): ?> bg-info
@@ -214,7 +212,7 @@
                                             <form action="<?php echo e(route('pm.companies.destroy', $company)); ?>" method="POST" class="d-inline">
                                                 <?php echo csrf_field(); ?>
                                                 <?php echo method_field('DELETE'); ?>
-                                                <button type="submit" class="btn btn-outline-danger" title="Delete" 
+                                                <button type="submit" class="btn btn-outline-danger" title="Delete"
                                                         onclick="return confirm('Are you sure you want to delete this company?')">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
@@ -226,7 +224,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- Pagination -->
                     <?php if($companies->hasPages()): ?>
                         <div class="d-flex justify-content-between align-items-center mt-3 px-3 py-2 bg-light rounded">
@@ -375,4 +373,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/companies/index.blade.php ENDPATH**/ ?>
