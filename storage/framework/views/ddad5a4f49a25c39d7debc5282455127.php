@@ -5,6 +5,12 @@
     <div class="row">
         <div class="col-12">
             <!-- Header Section -->
+            <div class="mb-3">
+                <a href="<?php echo e(route('pm.single-item.index')); ?>" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to Single Item
+                </a>
+            </div>
             <div class="bg-pm-accent text-white p-4 rounded-top">
                 <div class="row align-items-center">
                     <div class="col-md-6">
@@ -118,6 +124,18 @@
                                 <input type="text" class="form-control" id="postage_display" readonly
                                        placeholder="Enter weight to calculate">
                                 <small class="text-muted">Auto-calculated postage</small>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="payment_type" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="payment_type" name="payment_type" required>
+                                    <option value="">Select Payment Type</option>
+                                    <option value="cash" <?php echo e(old('payment_type') == 'cash' ? 'selected' : ''); ?>>Cash</option>
+                                    <option value="prepaid" <?php echo e(old('payment_type') == 'prepaid' ? 'selected' : ''); ?>>Prepaid</option>
+                                </select>
+                                <small class="text-muted">Choose payment method</small>
                             </div>
                         </div>
 

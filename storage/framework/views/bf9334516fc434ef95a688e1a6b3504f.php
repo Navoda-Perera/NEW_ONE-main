@@ -5,6 +5,12 @@
     <div class="row">
         <div class="col-12">
             <!-- Header Section -->
+            <div class="mb-3">
+                <a href="<?php echo e(route('pm.single-item.index')); ?>" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>
+                    Back to Single Item
+                </a>
+            </div>
             <div class="bg-pm-secondary text-white p-4 rounded-top">
                 <div class="row align-items-center">
                     <div class="col-md-6">
@@ -90,6 +96,17 @@
                                 <input type="number" class="form-control" id="weight" name="weight"
                                        value="<?php echo e(old('weight')); ?>" step="0.01" min="0.01" required>
                                 <small class="text-muted">Enter weight in grams (e.g., 250 for 250g)</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="payment_type" class="form-label">Payment Type <span class="text-danger">*</span></label>
+                                <select class="form-select" id="payment_type" name="payment_type" required>
+                                    <option value="">Select Payment Type</option>
+                                    <option value="cash" <?php echo e(old('payment_type') == 'cash' ? 'selected' : ''); ?>>Cash</option>
+                                    <option value="prepaid" <?php echo e(old('payment_type') == 'prepaid' ? 'selected' : ''); ?>>Prepaid</option>
+                                </select>
+                                <small class="text-muted">Choose payment method</small>
+                            </div>
+                        </div>
                             </div>
                             <div class="col-md-6">
                                 <label for="postage_display" class="form-label">Postage Amount (LKR)</label>

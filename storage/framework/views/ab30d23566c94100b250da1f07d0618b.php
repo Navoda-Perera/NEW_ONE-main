@@ -555,6 +555,9 @@
             }
         }
     </style>
+    
+    <!-- PM Table Scrollbar CSS -->
+    <link href="<?php echo e(asset('css/pm-table-scrollbar.css')); ?>" rel="stylesheet">
 </head>
 <body>
     <!-- Sidebar -->
@@ -589,9 +592,23 @@
             </div>
 
             <div class="nav-item">
+                <a href="<?php echo e(route('pm.bulk-upload.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.bulk-upload.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-cloud-upload"></i>
+                    <span>Bulk Upload</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
                 <a href="<?php echo e(route('pm.item-management.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.item-management.*') ? 'active' : ''); ?>">
                     <i class="bi bi-search"></i>
                     <span>Item Management</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="<?php echo e(route('pm.companies.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.companies.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-building"></i>
+                    <span>Companies</span>
                 </a>
             </div>
 
