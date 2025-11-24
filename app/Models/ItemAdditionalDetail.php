@@ -70,10 +70,10 @@ class ItemAdditionalDetail extends Model
     }
 
     /**
-     * Calculate commission based on amount (2%)
+     * Calculate commission based on fixed 50.00 LKR charge for all COD-type services
      */
     public function calculateCommission()
     {
-        return $this->amount * 0.02; // 2% commission
+        return 50.00; // Fixed 50.00 LKR COD service charge
     }
 }

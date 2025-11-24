@@ -273,8 +273,22 @@
 @endif
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
+function printReceipts() {
+    // Get the most recent ItemBulk ID (stored during upload)
+    const bulkId = {{ session('bulk_id') ?? 'null' }};
+
+    if (!bulkId) {
+        alert('No bulk upload found to print receipts for.');
+        return;
+    }
+
+    // Open bulk receipt directly for printing
+    const printUrl = `/pm/bulk-upload/print-receipt/${bulkId}`;
+    window.open(printUrl, '_blank');
+}
+
 function removeItem(itemId) {
     if (!confirm('Are you sure you want to remove this item?')) {
         return;
@@ -312,6 +326,8 @@ function removeItem(itemId) {
 }
 
 function processBulk(bulkId, buttonElement) {
+    console.log('processBulk called with bulkId:', bulkId, 'button:', buttonElement);
+
     if (!confirm('Are you sure you want to submit all items? This will create receipts and cannot be undone.')) {
         return;
     }
@@ -322,9 +338,9 @@ function processBulk(bulkId, buttonElement) {
     submitBtn.innerHTML = '<i class="bi bi-spinner bi-spin me-2"></i>Processing...';
     submitBtn.disabled = true;
 
-    console.log('Processing bulk with ID:', bulkId);
+    console.log('About to fetch URL:', `/pm/bulk-upload/process-bulk/${bulkId}`);
 
-    fetch(`{{ route('pm.bulk-upload.process-bulk', ':id') }}`.replace(':id', bulkId), {
+    fetch(`/pm/bulk-upload/process-bulk/${bulkId}`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -341,14 +357,21 @@ function processBulk(bulkId, buttonElement) {
     .then(data => {
         console.log('Response data:', data);
         if (data.success) {
-            // Show success message
+            // Show success message with print button
             const alertDiv = document.createElement('div');
-            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.className = 'alert alert-success alert-dismissible fade show d-flex justify-content-between align-items-center';
             alertDiv.innerHTML = `
-                <i class="bi bi-check-circle me-2"></i>
-                ${data.message}
-                <br><small>Created ${data.receipts_created || 0} receipts successfully.</small>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div>
+                    <i class="bi bi-check-circle me-2"></i>
+                    ${data.message}
+                    <br><small>Created ${data.receipts_created || 0} receipts successfully.</small>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="printReceipts()">
+                        <i class="bi bi-printer me-1"></i> Print Receipts
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
             `;
 
             // Replace the uploaded items section with success message
@@ -358,10 +381,32 @@ function processBulk(bulkId, buttonElement) {
             }
 
             // Add success message to top of page
-            document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+            const contentWrapper = document.querySelector('.content-wrapper');
+            if (contentWrapper) {
+                contentWrapper.insertBefore(alertDiv, contentWrapper.firstChild);
+            } else {
+                // Fallback: try to find any container and add the alert
+                const body = document.body;
+                body.insertBefore(alertDiv, body.firstChild);
+            }
 
             // Scroll to top
             window.scrollTo(0, 0);
+
+            // Automatically open print receipts after 2 seconds
+            setTimeout(() => {
+                if (confirm('Upload successful! Would you like to print the receipt now?')) {
+                    // Use the bulk ID from the response if available, otherwise use session
+                    const bulkId = data.bulk_id || {{ session('bulk_id') ?? 'null' }};
+                    if (bulkId) {
+                        const printUrl = `/pm/bulk-upload/print-receipt/${bulkId}`;
+                        window.open(printUrl, '_blank');
+                    } else {
+                        printReceipts();
+                    }
+                }
+            }, 2000);
+
         } else {
             console.error('Error response:', data);
             alert('Error: ' + data.message);
@@ -377,11 +422,6 @@ function processBulk(bulkId, buttonElement) {
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     });
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error processing bulk upload');
-    });
 }
 </script>
-@endpush
+@endsection

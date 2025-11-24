@@ -555,9 +555,6 @@
             }
         }
     </style>
-    
-    <!-- PM Table Scrollbar CSS -->
-    <link href="{{ asset('css/pm-table-scrollbar.css') }}" rel="stylesheet">
 </head>
 <body>
     <!-- Sidebar -->
@@ -602,13 +599,6 @@
                 <a href="{{ route('pm.item-management.index') }}" class="nav-link {{ request()->routeIs('pm.item-management.*') ? 'active' : '' }}">
                     <i class="bi bi-search"></i>
                     <span>Item Management</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="{{ route('pm.companies.index') }}" class="nav-link {{ request()->routeIs('pm.companies.*') ? 'active' : '' }}">
-                    <i class="bi bi-building"></i>
-                    <span>Companies</span>
                 </a>
             </div>
 

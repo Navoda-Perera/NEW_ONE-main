@@ -189,10 +189,8 @@ class CustomerDashboardController extends Controller
         // Item value and amount are only required for COD
         if (in_array($request->service_type, ['cod'])) {
             $rules['amount'] = 'required|numeric|min:0';
-            $rules['item_value'] = 'required|numeric|min:0';
         } else {
             $rules['amount'] = 'nullable|numeric|min:0';
-            $rules['item_value'] = 'nullable|numeric|min:0';
         }
 
         $request->validate($rules);
@@ -216,7 +214,7 @@ class CustomerDashboardController extends Controller
             'receiver_address' => $request->address,
             'weight' => $request->weight,
             'amount' => $request->amount ?? 0, // Default to 0 if not provided
-            'item_value' => $request->service_type === 'cod' ? $request->item_value : 0, // Only COD has item value
+            'item_value' => $request->service_type === 'cod' ? ($request->amount ?? 0) : 0, // For COD: item_value = collection amount
             'service_type' => $request->service_type, // Store service type directly
             'barcode' => $request->barcode, // Store customer-provided barcode
             'postage' => $postage,
@@ -999,10 +997,10 @@ class CustomerDashboardController extends Controller
                     break;
 
                 case 'cod':
-                    // COD = Register post base price + COD charges (2% of amount or min 50 LKR)
+                    // COD = Register post base price + Fixed COD charge (50.00 LKR)
                     $basePrice = \App\Models\PostPricing::calculatePrice($weight, \App\Models\PostPricing::TYPE_REGISTER);
                     if ($basePrice && $codAmount > 0) {
-                        $codFee = max(50, $codAmount * 0.02); // 2% or min 50 LKR
+                        $codFee = 50.00; // Fixed 50.00 LKR COD charge
                         $price = $basePrice + $codFee;
                     } else {
                         $price = $basePrice;

@@ -264,7 +264,7 @@ class PMItemController extends Controller
             Payment::create([
                 'item_id' => $newItem->id,
                 'fixed_amount' => $item->amount,
-                'commission' => $item->commission ?? 0.00,
+                'commission' => 50.00, // Fixed 50.00 LKR COD service charge
                 'item_value' => $item->item_value ?? $item->amount,
                 'status' => 'accept',
             ]);
@@ -925,7 +925,7 @@ class PMItemController extends Controller
             }
 
             // Search in main items table (removed location restriction)
-            $item = Item::with(['itemBulk', 'creator', 'updater'])
+            $item = Item::with(['creator', 'updater'])
                 ->where('barcode', $barcode)
                 ->first();
 

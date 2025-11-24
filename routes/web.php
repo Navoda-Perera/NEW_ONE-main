@@ -161,6 +161,7 @@ Route::prefix('pm')->name('pm.')->group(function () {
             Route::get('/template/{service}', [PMBulkUploadController::class, 'downloadTemplate'])->name('template');
             Route::delete('/remove-item/{id}', [PMBulkUploadController::class, 'removeItem'])->name('remove-item');
             Route::post('/process-bulk/{bulkId}', [PMBulkUploadController::class, 'processBulk'])->name('process-bulk');
+            Route::get('/print-receipt/{bulkId}', [PMBulkUploadController::class, 'printBulkReceipt'])->name('print-receipt');
         });
 
         // Item Management with Barcode Scanning

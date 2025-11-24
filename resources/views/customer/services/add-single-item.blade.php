@@ -241,17 +241,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="bi bi-currency-dollar me-2"></i>Collection Details
                     </h5>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label for="amount" class="form-label fw-semibold">
                                 <i class="bi bi-cash-stack me-1"></i>Collection Amount (LKR)
                             </label>
                             <input id="amount" type="number" step="0.01" min="0" class="form-control cod-amount-input" name="amount" placeholder="0.00" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="item_value" class="form-label fw-semibold">
-                                <i class="bi bi-gem me-1"></i>Item Value (LKR)
-                            </label>
-                            <input id="item_value" type="number" step="0.01" min="0" class="form-control" name="item_value" placeholder="0.00" required>
                         </div>
                     </div>
                 </div>

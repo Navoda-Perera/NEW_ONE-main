@@ -11,6 +11,7 @@ use App\Models\Item;
 use App\Models\ItemBulk;
 use App\Models\Receipt;
 use App\Models\SmsSent;
+use App\Models\Payment;
 use App\Models\Company;
 use App\Models\Location;
 
@@ -253,7 +254,11 @@ class PMBulkUploadController extends Controller
                 $weight = (float) $weight;
                 $postage = $this->calculatePostageForService($serviceType, $weight);
                 $amount = (float) ($amount ?: 0);
-                $totalAmount = ($serviceType === 'cod') ? $amount : ($amount + $postage);
+                
+                // Store original CSV amount in item.amount for all service types
+                // Postage will be handled separately in receipt calculations
+                $itemAmount = $amount; // Always store the original CSV amount
+                $totalAmount = $amount + $postage; // Total for receipt calculations
 
                 // Create Item record
                 $item = Item::create([
@@ -261,11 +266,20 @@ class PMBulkUploadController extends Controller
                     'receiver_name' => $receiverName,
                     'receiver_address' => $fullAddress,
                     'weight' => $weight,
-                    'amount' => $totalAmount,
+                    'amount' => $itemAmount, // Store original CSV amount
                     'status' => 'accept',
                     'created_by' => $user->id,
                     'item_bulk_id' => $itemBulk->id
-                ]);
+                ]);                // Create Payment record for COD items with fixed 50.00 LKR commission
+                if ($serviceType === 'cod' && $amount > 0) {
+                    Payment::create([
+                        'item_id' => $item->id,
+                        'fixed_amount' => $amount, // COD amount only
+                        'commission' => 50.00, // Fixed 50.00 LKR COD service charge
+                        'item_value' => $amount, // Item value is the full COD amount
+                        'status' => 'accept',
+                    ]);
+                }
 
                 // Create SMS record
                 SmsSent::create([
@@ -394,14 +408,23 @@ class PMBulkUploadController extends Controller
     public function processBulk($bulkId)
     {
         try {
+            Log::info('ProcessBulk called with bulkId: ' . $bulkId);
+            
             DB::beginTransaction();
 
             // Get all items for this bulk upload
             $itemBulk = ItemBulk::findOrFail($bulkId);
             $items = Item::where('item_bulk_id', $bulkId)->with('smsSents')->get();
 
+            Log::info('Found ' . $items->count() . ' items for bulk ' . $bulkId);
+
             if ($items->isEmpty()) {
                 return response()->json(['success' => false, 'message' => 'No items found to process.']);
+            }
+
+            $currentUser = Auth::guard('pm')->user();
+            if (!$currentUser) {
+                return response()->json(['success' => false, 'message' => 'Authentication required.']);
             }
 
             $receiptsCreated = 0;
@@ -410,33 +433,59 @@ class PMBulkUploadController extends Controller
                 $smsRecord = $item->smsSents->first();
                 $receiverMobile = $smsRecord ? $smsRecord->receiver_mobile : null;
 
+                // Calculate proper postage for this service type and weight
+                $postage = $this->calculatePostageForService($itemBulk->service_type, $item->weight);
+                
+                // For COD items: amount is collection amount, total includes postage + commission
+                // For non-COD items: amount is item value, total is amount + postage  
+                if ($itemBulk->service_type === 'cod') {
+                    $totalAmount = $item->amount + $postage + 50.00; // COD amount + postage + commission
+                    $receiptAmount = $item->amount; // COD collection amount
+                } else {
+                    $totalAmount = $item->amount + $postage; // Item value + postage
+                    $receiptAmount = 0; // No COD amount for non-COD items
+                }
+
                 // Create receipt for each item
                 Receipt::create([
-                    'item_id' => $item->id,
                     'item_bulk_id' => $itemBulk->id,
-                    'barcode' => $item->barcode,
-                    'receiver_name' => $item->receiver_name,
-                    'receiver_mobile' => $receiverMobile,
-                    'receiver_address' => $item->receiver_address,
-                    'weight' => $item->weight,
-                    'postage' => $item->amount - ($item->amount > 50 ? 50 : 0), // Estimate postage
-                    'total_amount' => $item->amount,
-                    'service_type' => $itemBulk->service_type,
+                    'item_quantity' => 1,
+                    'amount' => $receiptAmount, // COD amount or 0 for non-COD
+                    'postage' => $postage, // Calculated postage
+                    'total_amount' => $totalAmount, // Total amount including all charges
+                    'payment_type' => 'cash',
+                    'created_by' => $currentUser->id,
                     'location_id' => $itemBulk->location_id,
-                    'created_by' => Auth::guard('pm')->id(),
-                    'status' => 'pending'
+                    'passcode' => substr(str_shuffle('0123456789'), 0, 6), // Generate 6-digit passcode
                 ]);
 
-                // Update item status to processed
-                $item->update(['status' => 'processed']);
+                // Create Payment record for COD items if not already created
+                if ($itemBulk->service_type === 'cod' && $item->amount > 0) {
+                    // Check if payment record already exists
+                    $existingPayment = Payment::where('item_id', $item->id)->first();
+                    if (!$existingPayment) {
+                        Payment::create([
+                            'item_id' => $item->id,
+                            'fixed_amount' => $item->amount, // COD amount
+                            'commission' => 50.00, // Fixed 50.00 LKR COD service charge
+                            'item_value' => $item->amount, // Item value is the full COD amount
+                            'status' => 'accept',
+                        ]);
+                    }
+                }
+
+                // Update item status to delivered (receipts are being created)
+                $item->update(['status' => 'delivered']);
 
                 $receiptsCreated++;
             }
 
-            // Update bulk status
-            $itemBulk->update(['category' => 'processed']);
+            // Bulk processing completed - receipts created successfully
+            // Note: ItemBulk category remains as 'bulk_list' to maintain its type
 
             DB::commit();
+
+            Log::info('ProcessBulk completed successfully. Created ' . $receiptsCreated . ' receipts.');
 
             return response()->json([
                 'success' => true,
@@ -446,6 +495,8 @@ class PMBulkUploadController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('ProcessBulk failed: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             return response()->json(['success' => false, 'message' => 'Error processing bulk items: ' . $e->getMessage()]);
         }
     }
@@ -479,6 +530,52 @@ class PMBulkUploadController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Error processing bulk items: ' . $e->getMessage()]);
+        }
+    }
+
+    public function printBulkReceipt($bulkId)
+    {
+        try {
+            // Get the ItemBulk with its items and related data
+            $itemBulk = ItemBulk::with(['items.smsSents', 'creator', 'location'])->find($bulkId);
+            
+            if (!$itemBulk) {
+                return redirect()->back()->with('error', 'Bulk upload not found.');
+            }
+
+            // Calculate totals
+            $totalItems = $itemBulk->items->count();
+            $totalAmount = $itemBulk->items->sum('amount');
+            
+            // Calculate total postage based on service type
+            $totalPostage = 0;
+            foreach ($itemBulk->items as $item) {
+                $totalPostage += $this->calculatePostageForService($itemBulk->service_type, $item->weight);
+            }
+            
+            $grandTotal = $totalAmount + $totalPostage;
+            
+            // Get service type display name
+            $serviceNames = [
+                'slp_courier' => 'SLP Courier',
+                'cod' => 'Cash on Delivery (COD)',
+                'register_post' => 'Register Post'
+            ];
+            
+            $serviceName = $serviceNames[$itemBulk->service_type] ?? $itemBulk->service_type;
+            
+            return view('pm.bulk-upload.print-receipt', compact(
+                'itemBulk', 
+                'totalItems', 
+                'totalAmount', 
+                'totalPostage', 
+                'grandTotal', 
+                'serviceName'
+            ));
+            
+        } catch (\Exception $e) {
+            Log::error('Error printing bulk receipt: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error generating receipt.');
         }
     }
 }

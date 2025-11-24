@@ -328,6 +328,7 @@ function displayItemDetails(item, type) {
         html += '<div class="d-flex gap-2 flex-wrap">';
         html += '<button type="button" class="btn btn-success btn-lg shadow-sm" onclick="updateItemInline(' + item.id + ')">';
         html += '<i class="bi bi-check-circle-fill"></i> Update Item</button>';
+        
         if (!['dispatched', 'delivered'].includes(item.status)) {
             html += '<button type="button" class="btn btn-danger btn-lg shadow-sm" onclick="deleteItem(' + item.id + ')">';
             html += '<i class="bi bi-trash-fill"></i> Delete</button>';
@@ -522,6 +523,10 @@ function showNotification(message, type) {
         });
     }, 5000);
 }
+
+
+
+
 
 // Test function to debug search issues
 function testSearch() {

@@ -276,7 +276,7 @@
 @endif
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
 function removeItem(itemId) {
     if (!confirm('Are you sure you want to remove this item?')) {
@@ -335,6 +335,8 @@ function updateTotalAmount() {
 }
 
 function processBulk(bulkId, buttonElement) {
+    console.log('processBulk called with bulkId:', bulkId, 'button:', buttonElement);
+    
     if (!confirm('Are you sure you want to submit all COD items? This will create receipts and cannot be undone.')) {
         return;
     }
@@ -345,7 +347,9 @@ function processBulk(bulkId, buttonElement) {
     submitBtn.innerHTML = '<i class="bi bi-spinner bi-spin me-2"></i>Processing...';
     submitBtn.disabled = true;
 
-    fetch(`{{ route('pm.bulk-upload.process-bulk', ':id') }}`.replace(':id', bulkId), {
+    console.log('About to fetch URL:', `/pm/bulk-upload/process-bulk/${bulkId}`);
+
+    fetch(`/pm/bulk-upload/process-bulk/${bulkId}`, {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -355,7 +359,19 @@ function processBulk(bulkId, buttonElement) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Show success message 
             alert(data.message);
+            
+            // Automatically prompt for receipt printing after 1 second
+            setTimeout(() => {
+                const printChoice = confirm('Upload completed successfully! Would you like to print the receipt now?');
+                if (printChoice) {
+                    // Open bulk receipt directly for printing  
+                    const printUrl = `/pm/bulk-upload/print-receipt/${bulkId}`;
+                    window.open(printUrl, '_blank');
+                }
+            }, 1000);
+            
             location.reload(); // Refresh page to clear uploaded items
         } else {
             alert('Error: ' + data.message);
@@ -367,4 +383,4 @@ function processBulk(bulkId, buttonElement) {
     });
 }
 </script>
-@endpush
+@endsection

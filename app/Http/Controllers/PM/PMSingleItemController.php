@@ -8,6 +8,7 @@ use App\Models\ItemBulk;
 use App\Models\Receipt;
 use App\Models\SlpPricing;
 use App\Models\PostPricing;
+use App\Models\Payment;
 use App\Models\Location;
 use App\Models\SmsSent;
 use Illuminate\Http\Request;
@@ -165,6 +166,15 @@ class PMSingleItemController extends Controller
                 'sender_mobile' => $user->mobile ?? '',
                 'receiver_mobile' => $request->receiver_mobile,
                 'status' => 'accept'
+            ]);
+
+            // Create Payment record for COD items with fixed 50.00 LKR commission
+            Payment::create([
+                'item_id' => $item->id,
+                'fixed_amount' => $request->amount,
+                'commission' => 50.00, // Fixed 50.00 LKR COD service charge
+                'item_value' => $request->amount,
+                'status' => 'accept',
             ]);
 
             // Create Receipt with proper postage and total calculation

@@ -286,7 +286,7 @@ class PMDashboardController extends Controller
                     Payment::create([
                         'item_id' => $item->id,
                         'fixed_amount' => $tempItem->amount,
-                        'commission' => $tempItem->commission ?? 0.00,
+                        'commission' => 50.00, // Fixed 50.00 LKR COD service charge
                         'item_value' => $tempItem->item_value ?? $tempItem->amount,
                         'status' => 'accept',
                     ]);
@@ -399,7 +399,7 @@ class PMDashboardController extends Controller
                     Payment::create([
                         'item_id' => $item->id,
                         'fixed_amount' => $tempItem->amount,
-                        'commission' => $tempItem->commission ?? 0.00,
+                        'commission' => 50.00, // Fixed 50.00 LKR COD service charge
                         'item_value' => $tempItem->item_value ?? $tempItem->amount,
                         'status' => 'accept',
                     ]);
