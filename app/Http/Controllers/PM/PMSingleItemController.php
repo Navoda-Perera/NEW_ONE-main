@@ -71,14 +71,14 @@ class PMSingleItemController extends Controller
                 'item_quantity' => 1
             ]);
 
-            // Create Item entry - SLP has no COD charges, only postage
+            // Create Item entry - SLP: amount = postage for consistency with bulk upload
             $item = Item::create([
                 'item_bulk_id' => $itemBulk->id,
                 'barcode' => $request->barcode,
                 'receiver_name' => $request->receiver_name,
                 'receiver_address' => $request->receiver_address,
                 'weight' => $request->weight,
-                'amount' => 0, // No COD charges for SLP
+                'amount' => $postage, // Store postage as amount for SLP (consistent with bulk upload)
                 'status' => 'accept',
                 'created_by' => $user->id
             ]);
@@ -96,7 +96,7 @@ class PMSingleItemController extends Controller
                 'item_quantity' => 1,
                 'item_bulk_id' => $itemBulk->id,
                 'amount' => 0, // SLP has no COD charges, only postage
-                'postage' => $postage, // Store calculated postage
+                'postage' => $postage, // Store calculated postage in postage field
                 'total_amount' => $postage, // For SLP, total = postage only
                 'payment_type' => 'cash',
                 'created_by' => $user->id,
@@ -232,14 +232,14 @@ class PMSingleItemController extends Controller
                 'item_quantity' => 1
             ]);
 
-            // Create Item entry - Register has no COD charges, only postage
+            // Create Item entry - Register Post: amount = postage for consistency with bulk upload
             $item = Item::create([
                 'item_bulk_id' => $itemBulk->id,
                 'barcode' => $request->barcode,
                 'receiver_name' => $request->receiver_name,
                 'receiver_address' => $request->receiver_address,
                 'weight' => $request->weight,
-                'amount' => 0, // No COD charges for Register
+                'amount' => $postage, // Store postage as amount for Register Post (consistent with bulk upload)
                 'status' => 'accept',
                 'created_by' => $user->id
             ]);
@@ -257,7 +257,7 @@ class PMSingleItemController extends Controller
                 'item_quantity' => 1,
                 'item_bulk_id' => $itemBulk->id,
                 'amount' => 0, // Register Post has no COD charges, only postage
-                'postage' => $postage, // Store calculated postage
+                'postage' => $postage, // Store calculated postage in postage field
                 'total_amount' => $postage, // For Register Post, total = postage only
                 'payment_type' => 'cash',
                 'created_by' => $user->id,

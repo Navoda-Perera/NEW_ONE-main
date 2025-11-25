@@ -255,10 +255,16 @@ class PMBulkUploadController extends Controller
                 $postage = $this->calculatePostageForService($serviceType, $weight);
                 $amount = (float) ($amount ?: 0);
                 
-                // Store original CSV amount in item.amount for all service types
-                // Postage will be handled separately in receipt calculations
-                $itemAmount = $amount; // Always store the original CSV amount
-                $totalAmount = $amount + $postage; // Total for receipt calculations
+                // For SLP and Register Post: amount is postage (CSV amount is ignored)
+                // For COD: amount is the collection amount from CSV
+                if ($serviceType === 'cod') {
+                    $itemAmount = $amount; // Store COD collection amount
+                    $totalAmount = $amount + $postage; // COD amount + postage
+                } else {
+                    // For SLP and Register Post: amount field stores the postage
+                    $itemAmount = $postage; // Store postage as amount
+                    $totalAmount = $postage; // Total is just the postage
+                }
 
                 // Create Item record
                 $item = Item::create([
@@ -437,12 +443,13 @@ class PMBulkUploadController extends Controller
                 $postage = $this->calculatePostageForService($itemBulk->service_type, $item->weight);
                 
                 // For COD items: amount is collection amount, total includes postage + commission
-                // For non-COD items: amount is item value, total is amount + postage  
+                // For SLP and Register Post: amount is already the postage, no collection amount
                 if ($itemBulk->service_type === 'cod') {
                     $totalAmount = $item->amount + $postage + 50.00; // COD amount + postage + commission
                     $receiptAmount = $item->amount; // COD collection amount
                 } else {
-                    $totalAmount = $item->amount + $postage; // Item value + postage
+                    // For SLP and Register Post: item.amount already contains postage
+                    $totalAmount = $item->amount; // Total is just the postage (stored in amount)
                     $receiptAmount = 0; // No COD amount for non-COD items
                 }
 
@@ -451,7 +458,7 @@ class PMBulkUploadController extends Controller
                     'item_bulk_id' => $itemBulk->id,
                     'item_quantity' => 1,
                     'amount' => $receiptAmount, // COD amount or 0 for non-COD
-                    'postage' => $postage, // Calculated postage
+                    'postage' => ($itemBulk->service_type === 'cod') ? $postage : $item->amount, // Use calculated postage for COD, stored amount for others
                     'total_amount' => $totalAmount, // Total amount including all charges
                     'payment_type' => 'cash',
                     'created_by' => $currentUser->id,
@@ -543,17 +550,23 @@ class PMBulkUploadController extends Controller
                 return redirect()->back()->with('error', 'Bulk upload not found.');
             }
 
-            // Calculate totals
+            // Calculate totals based on service type
             $totalItems = $itemBulk->items->count();
-            $totalAmount = $itemBulk->items->sum('amount');
             
-            // Calculate total postage based on service type
-            $totalPostage = 0;
-            foreach ($itemBulk->items as $item) {
-                $totalPostage += $this->calculatePostageForService($itemBulk->service_type, $item->weight);
+            if ($itemBulk->service_type === 'cod') {
+                // For COD: amount is collection amount, calculate postage separately
+                $totalAmount = $itemBulk->items->sum('amount');
+                $totalPostage = 0;
+                foreach ($itemBulk->items as $item) {
+                    $totalPostage += $this->calculatePostageForService($itemBulk->service_type, $item->weight);
+                }
+                $grandTotal = $totalAmount + $totalPostage;
+            } else {
+                // For SLP and Register Post: amount already contains postage
+                $totalPostage = $itemBulk->items->sum('amount'); // This is actually the total postage
+                $totalAmount = 0; // No separate collection amount
+                $grandTotal = $totalPostage; // Grand total is just the postage
             }
-            
-            $grandTotal = $totalAmount + $totalPostage;
             
             // Get service type display name
             $serviceNames = [

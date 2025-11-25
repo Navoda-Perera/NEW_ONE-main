@@ -321,7 +321,7 @@ unset($__errorArgs, $__bag); ?>
 function printReceipts() {
     // Get the most recent ItemBulk ID (stored during upload)
     const bulkId = <?php echo e(session('bulk_id') ?? 'null'); ?>;
-    
+
     if (!bulkId) {
         alert('No bulk upload found to print receipts for.');
         return;
@@ -370,7 +370,7 @@ function removeItem(itemId) {
 
 function processBulk(bulkId, buttonElement) {
     console.log('processBulk called with bulkId:', bulkId, 'button:', buttonElement);
-    
+
     if (!confirm('Are you sure you want to submit all items? This will create receipts and cannot be undone.')) {
         return;
     }
