@@ -7,6 +7,8 @@
     <title><?php echo $__env->yieldContent('title'); ?> - SL Post System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Select2 for enhanced dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         :root {
             --pm-primary: #4682B4;        /* Stormy Sky - main primary color */
@@ -603,6 +605,13 @@
             </div>
 
             <div class="nav-item">
+                <a href="<?php echo e(route('pm.dispatch.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.dispatch.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-truck"></i>
+                    <span>Postal Bag Dispatch</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
                 <a href="<?php echo e(route('pm.customer-uploads')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.customer-uploads') ? 'active' : ''); ?>">
                     <i class="bi bi-inbox"></i>
                     <span>Customer Uploads</span>
@@ -662,6 +671,7 @@
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Custom Scripts Section -->
     <?php echo $__env->yieldContent('scripts'); ?>

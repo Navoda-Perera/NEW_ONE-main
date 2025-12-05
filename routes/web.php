@@ -13,7 +13,7 @@ use App\Http\Controllers\PM\PMSingleItemController;
 use App\Http\Controllers\PM\PMBulkUploadController;
 use App\Http\Controllers\PM\CompanyController;
 // use App\Http\Controllers\DeliveryController; // Temporarily commented out
-// use App\Http\Controllers\DispatchController; // Temporarily commented out
+use App\Http\Controllers\PM\DispatchController;
 // use App\Http\Controllers\PaymentController; // Temporarily commented out
 // use App\Http\Controllers\ReceiptController; // Temporarily commented out
 // use App\Http\Controllers\TrackingController; // Temporarily commented out
@@ -191,9 +191,21 @@ Route::prefix('pm')->name('pm.')->group(function () {
         // Route::resource('deliveries', DeliveryController::class);
         // Route::post('/deliveries/{delivery}/assign-items', [DeliveryController::class, 'assignItems'])->name('deliveries.assign-items');
 
-        // Dispatch management routes (temporarily commented out)
-        // Route::resource('dispatches', DispatchController::class);
-        // Route::post('/dispatches/{dispatch}/assign-items', [DispatchController::class, 'assignItems'])->name('dispatches.assign-items');
+        // Dispatch management routes
+        Route::prefix('dispatch')->name('dispatch.')->group(function () {
+            Route::get('/', [DispatchController::class, 'index'])->name('index');
+            Route::get('/create', [DispatchController::class, 'create'])->name('create');
+            Route::post('/', [DispatchController::class, 'store'])->name('store');
+            Route::get('/{dispatch}', [DispatchController::class, 'show'])->name('show');
+            Route::get('/{dispatch}/edit', [DispatchController::class, 'edit'])->name('edit');
+            Route::put('/{dispatch}', [DispatchController::class, 'update'])->name('update');
+            Route::delete('/{dispatch}', [DispatchController::class, 'destroy'])->name('destroy');
+            Route::get('/{dispatch}/add-items', [DispatchController::class, 'addItems'])->name('add-items');
+            Route::post('/{dispatch}/add-item-barcode', [DispatchController::class, 'addItemByBarcode'])->name('add-item-barcode');
+            Route::delete('/{dispatch}/remove-item', [DispatchController::class, 'removeItem'])->name('remove-item');
+            Route::get('/{dispatch}/manifest', [DispatchController::class, 'generateManifest'])->name('manifest');
+            Route::get('/{dispatch}/print-manifest', [DispatchController::class, 'printManifest'])->name('print-manifest');
+        });
 
         // Payment management routes (temporarily commented out)
         // Route::resource('payments', PaymentController::class);

@@ -402,7 +402,19 @@ function processBulk(bulkId, buttonElement) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            // Show success message 
             alert(data.message);
+            
+            // Automatically prompt for receipt printing after 1 second
+            setTimeout(() => {
+                const printChoice = confirm('Upload completed successfully! Would you like to print the receipt now?');
+                if (printChoice) {
+                    // Open bulk receipt directly for printing  
+                    const printUrl = `/pm/bulk-upload/print-receipt/${bulkId}`;
+                    window.open(printUrl, '_blank');
+                }
+            }, 1000);
+            
             location.reload(); // Refresh page to clear uploaded items
         } else {
             alert('Error: ' + data.message);
