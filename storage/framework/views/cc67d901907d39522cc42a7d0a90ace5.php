@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Dispatch Details - ' . $dispatch->manifest_id); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -12,15 +10,15 @@
 
         </h1>
         <div>
-            <a href="<?php echo e(route('pm.dispatch.add-items', $dispatch->id)); ?>" 
+            <a href="<?php echo e(route('pm.dispatch.add-items', $dispatch->id)); ?>"
                class="btn btn-sm btn-success shadow-sm mr-2">
                 <i class="fas fa-plus fa-sm text-white-50"></i> Add Items
             </a>
-            <a href="<?php echo e(route('pm.dispatch.manifest', $dispatch->id)); ?>" 
+            <a href="<?php echo e(route('pm.dispatch.manifest', $dispatch->id)); ?>"
                class="btn btn-sm btn-info shadow-sm mr-2">
                 <i class="fas fa-file-alt fa-sm text-white-50"></i> View Manifest
             </a>
-            <a href="<?php echo e(route('pm.dispatch.print-manifest', $dispatch->id)); ?>" 
+            <a href="<?php echo e(route('pm.dispatch.print-manifest', $dispatch->id)); ?>"
                class="btn btn-sm btn-secondary shadow-sm mr-2" target="_blank">
                 <i class="fas fa-print fa-sm text-white-50"></i> Print
             </a>
@@ -280,29 +278,29 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="<?php echo e(route('pm.dispatch.add-items', $dispatch->id)); ?>" 
+                        <a href="<?php echo e(route('pm.dispatch.add-items', $dispatch->id)); ?>"
                            class="btn btn-success btn-block mb-2">
                             <i class="fas fa-plus"></i> Add More Items
                         </a>
-                        
-                        <a href="<?php echo e(route('pm.dispatch.manifest', $dispatch->id)); ?>" 
+
+                        <a href="<?php echo e(route('pm.dispatch.manifest', $dispatch->id)); ?>"
                            class="btn btn-info btn-block mb-2">
                             <i class="fas fa-file-alt"></i> View Manifest
                         </a>
-                        
-                        <a href="<?php echo e(route('pm.dispatch.print-manifest', $dispatch->id)); ?>" 
+
+                        <a href="<?php echo e(route('pm.dispatch.print-manifest', $dispatch->id)); ?>"
                            class="btn btn-secondary btn-block mb-2" target="_blank">
                             <i class="fas fa-print"></i> Print Manifest
                         </a>
-                        
-                        <a href="<?php echo e(route('pm.dispatch.edit', $dispatch->id)); ?>" 
+
+                        <a href="<?php echo e(route('pm.dispatch.edit', $dispatch->id)); ?>"
                            class="btn btn-warning btn-block mb-2">
                             <i class="fas fa-edit"></i> Edit Dispatch
                         </a>
-                        
-                        <button type="button" 
-                                class="btn btn-danger btn-block" 
-                                data-toggle="modal" 
+
+                        <button type="button"
+                                class="btn btn-danger btn-block"
+                                data-toggle="modal"
                                 data-target="#deleteModal">
                             <i class="fas fa-trash"></i> Delete Dispatch
                         </button>
@@ -352,43 +350,44 @@
     .border-left-primary {
         border-left: 0.25rem solid #4e73df !important;
     }
-    
+
     .border-left-success {
         border-left: 0.25rem solid #1cc88a !important;
     }
-    
+
     .border-left-info {
         border-left: 0.25rem solid #36b9cc !important;
     }
-    
+
     .border-left-warning {
         border-left: 0.25rem solid #f6c23e !important;
     }
-    
+
     .badge {
         font-size: 0.75rem;
     }
-    
+
     .card-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
-    
+
     .table th {
         background-color: #f8f9fc;
         border-top: none;
         font-weight: 600;
         font-size: 0.85rem;
     }
-    
+
     .btn-block {
         width: 100%;
         margin-bottom: 0.5rem;
     }
-    
+
     .text-xs {
         font-size: 0.7rem;
     }
 </style>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/dispatch/show.blade.php ENDPATH**/ ?>
