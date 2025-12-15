@@ -12,6 +12,7 @@ use App\Http\Controllers\PM\PMItemController;
 use App\Http\Controllers\PM\PMSingleItemController;
 use App\Http\Controllers\PM\PMBulkUploadController;
 use App\Http\Controllers\PM\CompanyController;
+use App\Http\Controllers\PM\PostmanController;
 // use App\Http\Controllers\DeliveryController; // Temporarily commented out
 use App\Http\Controllers\PM\DispatchController;
 // use App\Http\Controllers\PaymentController; // Temporarily commented out
@@ -185,6 +186,18 @@ Route::prefix('pm')->name('pm.')->group(function () {
             Route::delete('/{company}', [CompanyController::class, 'destroy'])->name('destroy');
             Route::post('/{company}/add-balance', [CompanyController::class, 'addBalance'])->name('add-balance');
             Route::post('/{company}/deduct-balance', [CompanyController::class, 'deductBalance'])->name('deduct-balance');
+        });
+
+        // Postmen management routes
+        Route::prefix('postmen')->name('postmen.')->group(function () {
+            Route::get('/', [PostmanController::class, 'index'])->name('index');
+            Route::get('/create', [PostmanController::class, 'create'])->name('create');
+            Route::post('/', [PostmanController::class, 'store'])->name('store');
+            Route::get('/{id}', [PostmanController::class, 'show'])->name('show');
+            Route::get('/{id}/edit', [PostmanController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [PostmanController::class, 'update'])->name('update');
+            Route::delete('/{id}', [PostmanController::class, 'destroy'])->name('destroy');
+            Route::patch('/{id}/toggle-status', [PostmanController::class, 'toggleStatus'])->name('toggle-status');
         });
 
         // Delivery management routes (temporarily commented out)

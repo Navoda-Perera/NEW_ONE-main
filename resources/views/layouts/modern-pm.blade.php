@@ -659,6 +659,13 @@
                 </a>
             </div>
 
+            <div class="nav-item">
+                <a href="{{ route('pm.postmen.index') }}" class="nav-link {{ request()->routeIs('pm.postmen.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Postmen</span>
+                </a>
+            </div>
+
             <!-- Upload Menu with Dropdown -->
             <div class="nav-item dropdown-nav">
                 <a href="#" class="nav-link dropdown-toggle {{ request()->routeIs('pm.single-item.*') || request()->routeIs('pm.bulk-upload.*') || request()->routeIs('pm.customer-uploads*') ? 'active' : '' }}" data-bs-toggle="collapse" data-bs-target="#uploadSubmenu" aria-expanded="{{ request()->routeIs('pm.single-item.*') || request()->routeIs('pm.bulk-upload.*') || request()->routeIs('pm.customer-uploads*') ? 'true' : 'false' }}">
