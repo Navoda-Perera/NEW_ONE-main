@@ -714,6 +714,14 @@
                             <i class="bi bi-mailbox"></i>
                             <span>Bag Dispatch</span>
                         </a>
+                        <a href="{{ route('pm.dispatch.change-location') }}" class="submenu-link {{ request()->routeIs('pm.dispatch.change-location') ? 'active' : '' }}">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span>Change Dispatch Location</span>
+                        </a>
+                        <a href="{{ route('pm.dispatch.receive-by-necklabel') }}" class="submenu-link {{ request()->routeIs('pm.dispatch.receive-by-necklabel') || request()->routeIs('pm.dispatch.find-items-by-necklabel') ? 'active' : '' }}">
+                            <i class="bi bi-inbox"></i>
+                            <span>Receive Items</span>
+                        </a>
                     </div>
                 </div>
             </div>

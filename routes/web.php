@@ -195,6 +195,22 @@ Route::prefix('pm')->name('pm.')->group(function () {
         Route::prefix('dispatch')->name('dispatch.')->group(function () {
             Route::get('/', [DispatchController::class, 'index'])->name('index');
             Route::get('/create', [DispatchController::class, 'create'])->name('create');
+
+            // Change dispatch location routes (must come before {dispatch} parameter routes)
+            Route::get('/change-location', [DispatchController::class, 'changeLocationForm'])->name('change-location');
+            Route::post('/search-by-necklabel', [DispatchController::class, 'searchByNecklabel'])->name('search-by-necklabel');
+            Route::post('/verify-item-barcode', [DispatchController::class, 'verifyItemBarcode'])->name('verify-item-barcode');
+            Route::put('/update-dispatch-location', [DispatchController::class, 'updateDispatchLocation'])->name('update-location');
+
+            // Lookup dispatch by item barcode
+            Route::get('/lookup-by-barcode', [DispatchController::class, 'lookupByBarcodeForm'])->name('lookup-by-barcode');
+            Route::post('/search-by-barcode', [DispatchController::class, 'searchByBarcode'])->name('search-by-barcode');
+
+            // Mark items as received by necklabel
+            Route::get('/receive-by-necklabel', [DispatchController::class, 'receiveByNecklabelForm'])->name('receive-by-necklabel');
+            Route::post('/find-items-by-necklabel', [DispatchController::class, 'findItemsByNecklabel'])->name('find-items-by-necklabel');
+            Route::post('/mark-items-received', [DispatchController::class, 'markItemsReceived'])->name('mark-items-received');
+
             Route::post('/', [DispatchController::class, 'store'])->name('store');
             Route::get('/{dispatch}', [DispatchController::class, 'show'])->name('show');
             Route::get('/{dispatch}/edit', [DispatchController::class, 'edit'])->name('edit');

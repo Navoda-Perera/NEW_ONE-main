@@ -475,4 +475,290 @@ class DispatchController extends Controller
             return back()->with('error', 'Error deleting dispatch: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show form to change dispatch location by necklabel
+     */
+    public function changeLocationForm()
+    {
+        return view('pm.dispatch.change-location-step1');
+    }
+
+    /**
+     * Search dispatch by necklabel
+     */
+    public function searchByNecklabel(Request $request)
+    {
+        $request->validate([
+            'necklabel' => 'required|string|max:255',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        // Find dispatch by necklabel from current user's location
+        $dispatch = Dispatch::with(['destinationOffice', 'dispatchAssociates.item'])
+            ->where('necklabel', $request->necklabel)
+            ->where('location_id', $currentUser->location_id)
+            ->first();
+
+        if (!$dispatch) {
+            return back()->with('error', 'No dispatch found with necklabel: ' . $request->necklabel)
+                        ->withInput();
+        }
+
+        // Check if dispatch has any items
+        if ($dispatch->dispatchAssociates->isEmpty()) {
+            return back()->with('error', 'This dispatch has no items to modify.')
+                        ->withInput();
+        }
+
+        return view('pm.dispatch.change-location-step2', compact('dispatch'));
+    }
+
+    /**
+     * Verify item barcode for dispatch location change
+     */
+    public function verifyItemBarcode(Request $request)
+    {
+        $request->validate([
+            'dispatch_id' => 'required|exists:dispatches,id',
+            'barcode' => 'required|string|max:255',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        // Get the dispatch
+        $dispatch = Dispatch::with(['destinationOffice', 'dispatchAssociates.item'])
+            ->where('id', $request->dispatch_id)
+            ->where('location_id', $currentUser->location_id)
+            ->first();
+
+        if (!$dispatch) {
+            return back()->with('error', 'Dispatch not found or you do not have permission to modify it.');
+        }
+
+        // Check if the barcode exists in this dispatch
+        $itemExists = $dispatch->dispatchAssociates()
+            ->whereHas('item', function($query) use ($request) {
+                $query->where('barcode', $request->barcode);
+            })
+            ->exists();
+
+        if (!$itemExists) {
+            return back()->with('error', 'Barcode ' . $request->barcode . ' not found in this dispatch.')
+                        ->withInput();
+        }
+
+        // Get all delivery offices except the current location
+        $deliveryOffices = Location::where('id', '!=', $currentUser->location_id)
+            ->orderBy('name')
+            ->get();
+
+        return view('pm.dispatch.change-location-step3', compact('dispatch', 'deliveryOffices'));
+    }
+
+    /**
+     * Update dispatch destination office
+     */
+    public function updateDispatchLocation(Request $request)
+    {
+        $request->validate([
+            'dispatch_id' => 'required|exists:dispatches,id',
+            'new_destination_office' => 'required|exists:locations,id',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        try {
+            DB::beginTransaction();
+
+            // Get the dispatch
+            $dispatch = Dispatch::where('id', $request->dispatch_id)
+                ->where('location_id', $currentUser->location_id)
+                ->first();
+
+            if (!$dispatch) {
+                return back()->with('error', 'Dispatch not found or you do not have permission to modify it.');
+            }
+
+            $oldDestination = $dispatch->destinationOffice;
+
+            // Update dispatch destination office
+            $dispatch->update([
+                'destination_office' => $request->new_destination_office
+            ]);
+
+            $newDestination = Location::find($request->new_destination_office);
+
+            DB::commit();
+
+            return redirect()->route('pm.dispatch.index')
+                ->with('success', "Dispatch location updated successfully! Changed from '{$oldDestination->name}' to '{$newDestination->name}' for necklabel: {$dispatch->necklabel}");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error updating dispatch location', [
+                'error' => $e->getMessage(),
+                'dispatch_id' => $request->dispatch_id,
+                'user_id' => $currentUser->id
+            ]);
+
+            return back()->with('error', 'Error updating dispatch location: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show form to lookup dispatch by item barcode
+     */
+    public function lookupByBarcodeForm()
+    {
+        return view('pm.dispatch.get-necklabel');
+    }
+
+    /**
+     * Search dispatch by item barcode
+     */
+    public function searchByBarcode(Request $request)
+    {
+        $request->validate([
+            'barcode' => 'required|string|max:255',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        // Find item by barcode
+        $item = Item::where('barcode', $request->barcode)->first();
+
+        if (!$item) {
+            return back()->with('error', 'No item found with barcode: ' . $request->barcode)
+                        ->withInput();
+        }
+
+        // Find dispatch associate for this item
+        $dispatchAssociate = DispatchAssociate::with(['dispatch.destinationOffice', 'dispatch.location'])
+            ->where('item_id', $item->id)
+            ->first();
+
+        if (!$dispatchAssociate) {
+            return back()->with('error', 'This item has not been dispatched yet.')
+                        ->withInput();
+        }
+
+        // Check if user has permission to view this dispatch (same location)
+        if ($dispatchAssociate->dispatch->location_id !== $currentUser->location_id) {
+            return back()->with('error', 'You do not have permission to view this dispatch information.')
+                        ->withInput();
+        }
+
+        $dispatch = $dispatchAssociate->dispatch;
+
+        return view('pm.dispatch.necklabel-result', compact('item', 'dispatch', 'dispatchAssociate'));
+    }
+
+    /**
+     * Show form to enter necklabel for receiving items
+     */
+    public function receiveByNecklabelForm()
+    {
+        return view('pm.dispatch.receive-by-necklabel');
+    }
+
+    /**
+     * Find items by necklabel to mark as received
+     */
+    public function findItemsByNecklabel(Request $request)
+    {
+        $request->validate([
+            'necklabel' => 'required|string|max:255',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        // Find dispatch by necklabel
+        $dispatch = Dispatch::where('necklabel', $request->necklabel)->first();
+
+        if (!$dispatch) {
+            return back()->with('error', 'No dispatch found with necklabel: ' . $request->necklabel)
+                        ->withInput();
+        }
+
+        // Check if user's location is the destination of this dispatch
+        if ($dispatch->destination_office !== $currentUser->location_id) {
+            return back()->with('error', 'This necklabel is not for your location. You can only receive items dispatched to your office.')
+                        ->withInput();
+        }
+
+        // Get all dispatch associates for this dispatch that are not yet received
+        $dispatchAssociates = DispatchAssociate::with(['item'])
+            ->where('dispatch_id', $dispatch->id)
+            ->where('status', 'dispatch')  // Only items that are dispatched but not received
+            ->get();
+
+        if ($dispatchAssociates->isEmpty()) {
+            return back()->with('error', 'No items found to receive for necklabel: ' . $request->necklabel . '. All items may already be received.')
+                        ->withInput();
+        }
+
+        return view('pm.dispatch.receive-items', compact('dispatch', 'dispatchAssociates'));
+    }
+
+    /**
+     * Mark selected items as received
+     */
+    public function markItemsReceived(Request $request)
+    {
+        Log::info('markItemsReceived method called', [
+            'request_data' => $request->all(),
+            'user_id' => Auth::guard('pm')->id()
+        ]);
+
+        $request->validate([
+            'dispatch_id' => 'required|exists:dispatches,id',
+            'item_ids' => 'required|array|min:1',
+            'item_ids.*' => 'required|exists:items,id',
+        ]);
+
+        $currentUser = Auth::guard('pm')->user();
+
+        // Get the dispatch to verify permissions
+        $dispatch = Dispatch::findOrFail($request->dispatch_id);
+
+        Log::info('Dispatch found', [
+            'dispatch_id' => $dispatch->id,
+            'destination_office' => $dispatch->destination_office,
+            'user_location' => $currentUser->location_id
+        ]);
+
+        // Verify user's location is the destination of this dispatch
+        if ($dispatch->destination_office !== $currentUser->location_id) {
+            Log::warning('Permission denied for dispatch receive', [
+                'dispatch_destination' => $dispatch->destination_office,
+                'user_location' => $currentUser->location_id
+            ]);
+            return back()->with('error', 'You do not have permission to receive items for this dispatch.');
+        }
+
+        // Update the status of selected items to 'received'
+        $updatedCount = DispatchAssociate::where('dispatch_id', $dispatch->id)
+            ->whereIn('item_id', $request->item_ids)
+            ->where('status', 'dispatch')  // Only update items that are currently dispatched
+            ->update([
+                'status' => 'received',
+                'updated_by' => $currentUser->id,
+                'updated_at' => now(),
+            ]);
+
+        Log::info('Update completed', [
+            'updated_count' => $updatedCount,
+            'item_ids' => $request->item_ids
+        ]);
+
+        if ($updatedCount > 0) {
+            return redirect()->route('pm.dispatch.receive-by-necklabel')
+                           ->with('success', "Items received successfully! {$updatedCount} item(s) marked as received.");
+        } else {
+            return back()->with('error', 'No items were updated. They may already be received or invalid.');
+        }
+    }
 }
+

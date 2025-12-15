@@ -10,9 +10,17 @@
             <i class="fas fa-shipping-fast text-primary"></i>
             Postal Bag Dispatch Management
         </h1>
-        <a href="{{ route('pm.dispatch.create') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Create New Dispatch
-        </a>
+        <div class="d-flex">
+            <a href="{{ route('pm.dispatch.lookup-by-barcode') }}" class="btn btn-sm btn-info shadow-sm mr-2">
+                <i class="fas fa-search fa-sm text-white-50"></i> Get Necklabel
+            </a>
+            <a href="{{ route('pm.dispatch.change-location') }}" class="btn btn-sm btn-warning shadow-sm mr-2">
+                <i class="fas fa-exchange-alt fa-sm text-white-50"></i> Change Location
+            </a>
+            <a href="{{ route('pm.dispatch.create') }}" class="btn btn-sm btn-primary shadow-sm">
+                <i class="fas fa-plus fa-sm text-white-50"></i> Create New Dispatch
+            </a>
+        </div>
     </div>
 
     <!-- Success/Error Messages -->
@@ -95,47 +103,9 @@
                                                title="Print Manifest" target="_blank">
                                                 <i class="fas fa-print"></i> Print
                                             </a>
-
-                                            <a href="{{ route('pm.dispatch.edit', $dispatch->id) }}"
-                                               class="btn btn-sm btn-outline-warning mb-1"
-                                               title="Edit">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </a>
-
-                                            <button type="button"
-                                                    class="btn btn-sm btn-outline-danger"
-                                                    title="Delete"
-                                                    data-toggle="modal"
-                                                    data-target="#deleteModal{{ $dispatch->id }}">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
                                         </div>
 
-                                        <!-- Delete Modal -->
-                                        <div class="modal fade" id="deleteModal{{ $dispatch->id }}" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Confirm Delete</h5>
-                                                        <button type="button" class="close" data-dismiss="modal">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        Are you sure you want to delete dispatch <strong>{{ $dispatch->manifest_id }}</strong>?
-                                                        <br><small class="text-muted">This will revert all dispatched items back to accepted status.</small>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                        <form action="{{ route('pm.dispatch.destroy', $dispatch->id) }}" method="POST" style="display: inline;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger">Delete</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!-- Removed Delete Modal -->
                                     </td>
                                 </tr>
                             @endforeach
