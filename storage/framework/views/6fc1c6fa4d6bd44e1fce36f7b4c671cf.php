@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Postmen Management'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -16,9 +14,14 @@
 
                     </p>
                 </div>
-                <a href="<?php echo e(route('pm.postmen.create')); ?>" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-1"></i>Add New Postman
-                </a>
+                <div class="btn-group">
+                    <a href="<?php echo e(route('pm.postmen.beats')); ?>" class="btn btn-outline-primary">
+                        <i class="bi bi-map me-1"></i>Beat Management
+                    </a>
+                    <a href="<?php echo e(route('pm.postmen.create')); ?>" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>Add New Postman
+                    </a>
+                </div>
             </div>
 
             <!-- Success/Error Messages -->
