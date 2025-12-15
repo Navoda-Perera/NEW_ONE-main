@@ -48,13 +48,35 @@
             z-index: 1000;
             transition: all 0.3s ease;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: 4px 0 15px rgba(70, 130, 180, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Custom scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.5);
         }
 
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
             text-align: center;
+            flex-shrink: 0;
         }
 
         .sidebar-header .logo {
@@ -74,6 +96,9 @@
 
         .sidebar-nav {
             padding: 1rem 0;
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 2rem;
         }
 
         .nav-item {
@@ -121,45 +146,6 @@
             font-weight: 600;
         }
 
-        /* Sidebar User Profile */
-        .sidebar-user {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 1.25rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            background: rgba(0,0,0,0.1);
-        }
-
-        .sidebar-user-info {
-            display: flex;
-            align-items: center;
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .sidebar-user-info:hover {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            text-decoration: none;
-        }
-
-        .sidebar-user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 0.75rem;
-        }
-
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
@@ -196,6 +182,33 @@
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+        }
+
+        /* Header User Info Styles */
+        .user-avatar-small {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--pm-primary), var(--pm-accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--pm-dark);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .user-role {
+            font-size: 0.75rem;
+            color: var(--pm-primary);
+            opacity: 0.8;
         }
 
         /* Content Area */
@@ -538,6 +551,69 @@
             color: var(--pm-accent);
         }
 
+        /* Dropdown Navigation Styles */
+        .dropdown-nav {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .dropdown-nav .dropdown-toggle {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-nav .dropdown-arrow {
+            margin-left: auto;
+            transition: transform 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .dropdown-nav .dropdown-toggle[aria-expanded="true"] .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .submenu {
+            background: rgba(0,0,0,0.1);
+            margin: 0.5rem 0 0 0;
+            border-radius: 6px;
+            overflow: hidden;
+            width: calc(100% - 2rem);
+            margin-left: 1rem;
+            margin-right: 1rem;
+        }
+
+        .submenu-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            font-weight: 400;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+
+        .submenu-link:hover {
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+        }
+
+        .submenu-link.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            font-weight: 500;
+        }
+
+        .submenu-link i {
+            font-size: 1rem;
+            width: 16px;
+            text-align: center;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -583,18 +659,32 @@
                 </a>
             </div>
 
-            <div class="nav-item">
-                <a href="<?php echo e(route('pm.single-item.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.single-item.*') ? 'active' : ''); ?>">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Add Single Item</span>
-                </a>
-            </div>
-
-            <div class="nav-item">
-                <a href="<?php echo e(route('pm.bulk-upload.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.bulk-upload.*') ? 'active' : ''); ?>">
+            <!-- Upload Menu with Dropdown -->
+            <div class="nav-item dropdown-nav">
+                <a href="#" class="nav-link dropdown-toggle <?php echo e(request()->routeIs('pm.single-item.*') || request()->routeIs('pm.bulk-upload.*') || request()->routeIs('pm.customer-uploads*') ? 'active' : ''); ?>" data-bs-toggle="collapse" data-bs-target="#uploadSubmenu" aria-expanded="<?php echo e(request()->routeIs('pm.single-item.*') || request()->routeIs('pm.bulk-upload.*') || request()->routeIs('pm.customer-uploads*') ? 'true' : 'false'); ?>">
                     <i class="bi bi-cloud-upload"></i>
-                    <span>Bulk Upload</span>
+                    <span>Upload</span>
+                    <i class="bi bi-chevron-down dropdown-arrow"></i>
                 </a>
+                <div class="collapse <?php echo e(request()->routeIs('pm.single-item.*') || request()->routeIs('pm.bulk-upload.*') || request()->routeIs('pm.customer-uploads*') ? 'show' : ''); ?>" id="uploadSubmenu">
+                    <div class="submenu">
+                        <a href="<?php echo e(route('pm.single-item.index')); ?>" class="submenu-link <?php echo e(request()->routeIs('pm.single-item.*') ? 'active' : ''); ?>">
+                            <i class="bi bi-box-seam"></i>
+                            <span>Add Single Item</span>
+                        </a>
+                        <a href="<?php echo e(route('pm.bulk-upload.index')); ?>" class="submenu-link <?php echo e(request()->routeIs('pm.bulk-upload.*') ? 'active' : ''); ?>">
+                            <i class="bi bi-cloud-upload-fill"></i>
+                            <span>Bulk Upload</span>
+                        </a>
+                        <a href="<?php echo e(route('pm.customer-uploads')); ?>" class="submenu-link <?php echo e(request()->routeIs('pm.customer-uploads*') ? 'active' : ''); ?>">
+                            <i class="bi bi-inbox"></i>
+                            <span>Customer Uploads</span>
+                            <?php if(isset($pendingItemsCount) && $pendingItemsCount > 0): ?>
+                                <span class="notification-badge"><?php echo e($pendingItemsCount); ?></span>
+                            <?php endif; ?>
+                        </a>
+                    </div>
+                </div>
             </div>
 
             <div class="nav-item">
@@ -605,45 +695,29 @@
             </div>
 
             <div class="nav-item">
-                <a href="<?php echo e(route('pm.dispatch.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.dispatch.*') ? 'active' : ''); ?>">
-                    <i class="bi bi-truck"></i>
-                    <span>Postal Bag Dispatch</span>
+                <a href="<?php echo e(route('pm.companies.index')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.companies.*') ? 'active' : ''); ?>">
+                    <i class="bi bi-building"></i>
+                    <span>Companies</span>
                 </a>
             </div>
 
-            <div class="nav-item">
-                <a href="<?php echo e(route('pm.customer-uploads')); ?>" class="nav-link <?php echo e(request()->routeIs('pm.customer-uploads') ? 'active' : ''); ?>">
-                    <i class="bi bi-inbox"></i>
-                    <span>Customer Uploads</span>
-                    <?php if(isset($pendingItemsCount) && $pendingItemsCount > 0): ?>
-                        <span class="notification-badge"><?php echo e($pendingItemsCount); ?></span>
-                    <?php endif; ?>
+            <!-- Dispatch Menu with Dropdown -->
+            <div class="nav-item dropdown-nav">
+                <a href="#" class="nav-link dropdown-toggle <?php echo e(request()->routeIs('pm.dispatch.*') ? 'active' : ''); ?>" data-bs-toggle="collapse" data-bs-target="#dispatchSubmenu" aria-expanded="<?php echo e(request()->routeIs('pm.dispatch.*') ? 'true' : 'false'); ?>">
+                    <i class="bi bi-truck"></i>
+                    <span>Dispatch</span>
+                    <i class="bi bi-chevron-down dropdown-arrow"></i>
                 </a>
+                <div class="collapse <?php echo e(request()->routeIs('pm.dispatch.*') ? 'show' : ''); ?>" id="dispatchSubmenu">
+                    <div class="submenu">
+                        <a href="<?php echo e(route('pm.dispatch.index')); ?>" class="submenu-link <?php echo e(request()->routeIs('pm.dispatch.index') || request()->routeIs('pm.dispatch.show') || request()->routeIs('pm.dispatch.create') || request()->routeIs('pm.dispatch.edit') ? 'active' : ''); ?>">
+                            <i class="bi bi-mailbox"></i>
+                            <span>Bag Dispatch</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </nav>
-
-        <!-- User Profile at Bottom -->
-        <div class="sidebar-user">
-            <div class="sidebar-user-info">
-                <div class="sidebar-user-avatar">
-                    <?php echo e(strtoupper(substr(auth('pm')->user()->name, 0, 1))); ?>
-
-                </div>
-                <div>
-                    <div style="font-size: 0.9rem; font-weight: 600;"><?php echo e(auth('pm')->user()->name); ?></div>
-                    <div style="font-size: 0.75rem; opacity: 0.8;">Postmaster</div>
-                </div>
-            </div>
-
-            <!-- Logout Button -->
-            <form action="<?php echo e(route('pm.logout')); ?>" method="POST" style="margin-top: 0.75rem;">
-                <?php echo csrf_field(); ?>
-                <button type="submit" class="btn btn-logout w-100">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
-        </div>
     </div>
 
     <!-- Main Content -->
@@ -654,10 +728,34 @@
                 <div>
                     <h1 class="page-title"><?php echo $__env->yieldContent('title', 'PM Dashboard'); ?></h1>
                 </div>
-                <div class="header-date">
-                    <i class="bi bi-calendar3 text-primary"></i>
-                    <?php echo e(now()->format('M d, Y')); ?>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- User Info -->
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="user-avatar-small">
+                            <?php echo e(strtoupper(substr(auth('pm')->user()->name, 0, 1))); ?>
 
+                        </div>
+                        <div>
+                            <div class="user-name"><?php echo e(auth('pm')->user()->name); ?></div>
+                            <div class="user-role">Postmaster</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Date -->
+                    <div class="header-date">
+                        <i class="bi bi-calendar3 text-primary"></i>
+                        <?php echo e(now()->format('M d, Y')); ?>
+
+                    </div>
+                    
+                    <!-- Logout Button -->
+                    <form action="<?php echo e(route('pm.logout')); ?>" method="POST" class="d-inline">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-box-arrow-right me-1"></i>
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>

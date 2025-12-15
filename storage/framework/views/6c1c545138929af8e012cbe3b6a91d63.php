@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Add Items to Dispatch'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -75,9 +73,9 @@
                             Scan or Enter Barcode
                         </label>
                         <div class="input-group">
-                            <input type="text" 
-                                   class="form-control form-control-lg" 
-                                   id="barcodeInput" 
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="barcodeInput"
                                    placeholder="Scan barcode or type manually..."
                                    autocomplete="off"
                                    autofocus>
@@ -92,13 +90,13 @@
                             Use a barcode scanner or type the barcode manually. Press Enter or click Add Item.
                         </small>
                     </div>
-                    
+
                     <!-- Status Messages -->
                     <div id="barcodeMessage" class="mt-3" style="display: none;"></div>
                 </div>
             </div>
         </div>
-        
+
         <div class="col-md-4">
             <div class="card border-left-success shadow">
                 <div class="card-body">
@@ -153,8 +151,8 @@
                                 <td><?php echo e(number_format($associate->item->amount, 2)); ?></td>
                                 <td><?php echo e($associate->item->weight ?? 'N/A'); ?></td>
                                 <td>
-                                    <button type="button" 
-                                            class="btn btn-sm btn-outline-danger remove-item-btn" 
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger remove-item-btn"
                                             data-item-id="<?php echo e($associate->item->id); ?>"
                                             title="Remove from dispatch">
                                         <i class="fas fa-trash"></i>
@@ -165,7 +163,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
             <?php if($dispatch->dispatchAssociates->count() === 0): ?>
                 <div class="text-center py-5" id="emptyState">
                     <i class="fas fa-box-open fa-3x text-gray-300"></i>
@@ -200,8 +198,8 @@
                                 <tr>
                                     <td>
                                         <code><?php echo e($item->barcode); ?></code>
-                                        <button type="button" 
-                                                class="btn btn-xs btn-outline-primary ml-2 copy-barcode" 
+                                        <button type="button"
+                                                class="btn btn-xs btn-outline-primary ml-2 copy-barcode"
                                                 data-barcode="<?php echo e($item->barcode); ?>"
                                                 title="Copy barcode">
                                             <i class="fas fa-copy"></i>
@@ -232,10 +230,10 @@
 <script>
     $(document).ready(function() {
         let itemCounter = <?php echo e($dispatch->dispatchAssociates->count()); ?>;
-        
+
         // Focus on barcode input
         $('#barcodeInput').focus();
-        
+
         // Handle barcode input (Enter key or Add button)
         $('#barcodeInput').on('keypress', function(e) {
             if (e.which === 13) { // Enter key
@@ -243,23 +241,23 @@
                 addItemByBarcode();
             }
         });
-        
+
         $('#addItemBtn').on('click', function() {
             addItemByBarcode();
         });
-        
+
         // Add item by barcode function
         function addItemByBarcode() {
             const barcode = $('#barcodeInput').val().trim();
-            
+
             if (!barcode) {
                 showMessage('Please enter or scan a barcode', 'warning');
                 return;
             }
-            
+
             // Update scanner status
             $('#scannerStatus').html('<i class="fas fa-spinner fa-spin text-primary"></i> Processing...');
-            
+
             $.ajax({
                 url: '<?php echo e(route("pm.dispatch.add-item-barcode", $dispatch->id)); ?>',
                 type: 'POST',
@@ -271,25 +269,25 @@
                     if (response.success) {
                         // Add item to table
                         addItemToTable(response.item);
-                        
+
                         // Update counter
                         itemCounter++;
                         $('#itemsCount').text(itemCounter);
-                        
+
                         // Clear input
                         $('#barcodeInput').val('').focus();
-                        
+
                         // Hide empty state
                         $('#emptyState').hide();
-                        
+
                         showMessage('Item added successfully: ' + response.item.barcode, 'success');
-                        
+
                         // Play success sound (optional)
                         playSuccessSound();
                     } else {
                         showMessage(response.message, 'error');
                     }
-                    
+
                     $('#scannerStatus').html('<i class="fas fa-check-circle text-success"></i> Ready');
                 },
                 error: function(xhr) {
@@ -299,7 +297,7 @@
                     }
                     showMessage(message, 'error');
                     $('#scannerStatus').html('<i class="fas fa-exclamation-circle text-danger"></i> Error');
-                    
+
                     // Reset after 2 seconds
                     setTimeout(function() {
                         $('#scannerStatus').html('<i class="fas fa-check-circle text-success"></i> Ready');
@@ -307,7 +305,7 @@
                 }
             });
         }
-        
+
         // Add item to table
         function addItemToTable(item) {
             const newRow = `
@@ -319,8 +317,8 @@
                     <td>${parseFloat(item.amount).toFixed(2)}</td>
                     <td>${item.weight || 'N/A'}</td>
                     <td>
-                        <button type="button" 
-                                class="btn btn-sm btn-outline-danger remove-item-btn" 
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger remove-item-btn"
                                 data-item-id="${item.id}"
                                 title="Remove from dispatch">
                             <i class="fas fa-trash"></i>
@@ -328,15 +326,15 @@
                     </td>
                 </tr>
             `;
-            
+
             $('#dispatchItemsTable tbody').append(newRow);
         }
-        
+
         // Remove item from dispatch
         $(document).on('click', '.remove-item-btn', function() {
             const itemId = $(this).data('item-id');
             const row = $(this).closest('tr');
-            
+
             if (confirm('Are you sure you want to remove this item from the dispatch?')) {
                 $.ajax({
                     url: '<?php echo e(route("pm.dispatch.remove-item", $dispatch->id)); ?>',
@@ -351,12 +349,12 @@
                             itemCounter--;
                             $('#itemsCount').text(itemCounter);
                             showMessage('Item removed from dispatch', 'success');
-                            
+
                             // Show empty state if no items
                             if (itemCounter === 0) {
                                 $('#emptyState').show();
                             }
-                            
+
                             // Update row numbers
                             updateRowNumbers();
                         }
@@ -367,37 +365,37 @@
                 });
             }
         });
-        
+
         // Update row numbers
         function updateRowNumbers() {
             $('#dispatchItemsTable tbody tr').each(function(index) {
                 $(this).find('td:first').text(index + 1);
             });
         }
-        
+
         // Copy barcode to input
         $('.copy-barcode').on('click', function() {
             const barcode = $(this).data('barcode');
             $('#barcodeInput').val(barcode).focus();
             showMessage('Barcode copied to input', 'info');
         });
-        
+
         // Show message function
         function showMessage(message, type) {
             const alertClass = {
                 'success': 'alert-success',
-                'error': 'alert-danger', 
+                'error': 'alert-danger',
                 'warning': 'alert-warning',
                 'info': 'alert-info'
             }[type] || 'alert-info';
-            
+
             const icon = {
                 'success': 'fa-check-circle',
                 'error': 'fa-exclamation-triangle',
                 'warning': 'fa-exclamation-circle',
                 'info': 'fa-info-circle'
             }[type] || 'fa-info-circle';
-            
+
             $('#barcodeMessage').html(`
                 <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
                     <i class="fas ${icon}"></i> ${message}
@@ -406,27 +404,27 @@
                     </button>
                 </div>
             `).show();
-            
+
             // Auto-hide after 5 seconds
             setTimeout(function() {
                 $('#barcodeMessage .alert').alert('close');
             }, 5000);
         }
-        
+
         // Play success sound (optional)
         function playSuccessSound() {
             // You can add a success sound here if needed
             // const audio = new Audio('/sounds/beep-success.mp3');
             // audio.play();
         }
-        
+
         // Auto-focus on barcode input when clicking anywhere
         $(document).on('click', function() {
             if (!$(event.target).is('input, button, select, textarea, a')) {
                 $('#barcodeInput').focus();
             }
         });
-        
+
         // Prevent form submission on Enter
         $(document).on('keypress', function(e) {
             if (e.which === 13 && !$(e.target).is('textarea')) {
@@ -445,42 +443,42 @@
         font-weight: 600;
         font-size: 0.85rem;
     }
-    
+
     .badge {
         font-size: 0.75rem;
     }
-    
+
     .card-header {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
     }
-    
+
     #barcodeInput {
         font-family: 'Courier New', monospace;
         font-size: 1.1rem;
     }
-    
+
     .copy-barcode {
         font-size: 0.7rem;
         padding: 0.15rem 0.3rem;
     }
-    
+
     .btn-xs {
         padding: 0.15rem 0.3rem;
         font-size: 0.7rem;
         line-height: 1.2;
         border-radius: 0.15rem;
     }
-    
+
     .alert {
         animation: fadeIn 0.3s ease-in;
     }
-    
+
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    
+
     code {
         background-color: #f1f3f4;
         padding: 0.2rem 0.4rem;
@@ -489,4 +487,5 @@
     }
 </style>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/dispatch/add-items.blade.php ENDPATH**/ ?>

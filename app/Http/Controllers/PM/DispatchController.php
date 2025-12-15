@@ -21,7 +21,7 @@ class DispatchController extends Controller
     public function index()
     {
         $currentUser = Auth::guard('pm')->user();
-        
+
         $dispatches = Dispatch::with(['destinationOffice', 'creator', 'dispatchAssociates'])
             ->where('location_id', $currentUser->location_id)
             ->orderBy('created_at', 'desc')
@@ -47,7 +47,7 @@ class DispatchController extends Controller
     public function create()
     {
         $currentUser = Auth::guard('pm')->user();
-        
+
         // Get all other locations for destination selection
         $deliveryOffices = Location::where('id', '!=', $currentUser->location_id)
             ->orderBy('name')
@@ -80,7 +80,7 @@ class DispatchController extends Controller
         ]);
 
         $currentUser = Auth::guard('pm')->user();
-        
+
         try {
             DB::beginTransaction();
 
@@ -97,7 +97,7 @@ class DispatchController extends Controller
 
             // Decode items array from JSON
             $itemIds = json_decode($request->items);
-            
+
             if (!is_array($itemIds) || empty($itemIds)) {
                 throw new \Exception('No items selected for dispatch');
             }
@@ -157,7 +157,7 @@ class DispatchController extends Controller
             ->findOrFail($id);
 
         $currentUser = Auth::guard('pm')->user();
-        
+
         // Verify dispatch belongs to current user's location
         if ($dispatch->location_id !== $currentUser->location_id) {
             abort(403, 'Unauthorized access to this dispatch.');
@@ -200,7 +200,7 @@ class DispatchController extends Controller
 
             if (!$item) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Item not found or not available for dispatch'
                 ]);
             }
@@ -212,7 +212,7 @@ class DispatchController extends Controller
 
             if ($alreadyDispatched) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Item already dispatched'
                 ]);
             }
@@ -256,7 +256,7 @@ class DispatchController extends Controller
             ]);
 
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Error adding item: ' . $e->getMessage()
             ]);
         }
@@ -285,7 +285,7 @@ class DispatchController extends Controller
             if ($dispatchAssociate) {
                 // Update item status back to accept
                 Item::where('id', $request->item_id)->update(['status' => 'accept']);
-                
+
                 // Remove from dispatch
                 $dispatchAssociate->delete();
             }
@@ -306,8 +306,8 @@ class DispatchController extends Controller
     public function generateManifest($id)
     {
         $dispatch = Dispatch::with([
-            'destinationOffice', 
-            'creator', 
+            'destinationOffice',
+            'creator',
             'location',
             'dispatchAssociates.item'
         ])->findOrFail($id);
@@ -331,8 +331,8 @@ class DispatchController extends Controller
     public function printManifest($id)
     {
         $dispatch = Dispatch::with([
-            'destinationOffice', 
-            'creator', 
+            'destinationOffice',
+            'creator',
             'location',
             'dispatchAssociates.item'
         ])->findOrFail($id);
@@ -356,8 +356,8 @@ class DispatchController extends Controller
     public function show(string $id)
     {
         $dispatch = Dispatch::with([
-            'destinationOffice', 
-            'creator', 
+            'destinationOffice',
+            'creator',
             'location',
             'dispatchAssociates.item'
         ])->findOrFail($id);

@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Create Company'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -54,12 +52,12 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="name" class="form-label">Company Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="name" name="name" 
+                            <input type="text" class="form-control" id="name" name="name"
                                    value="<?php echo e(old('name')); ?>" required>
                         </div>
                         <div class="col-md-6">
                             <label for="telephone" class="form-label">Telephone <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" id="telephone" name="telephone" 
+                            <input type="text" class="form-control" id="telephone" name="telephone"
                                    value="<?php echo e(old('telephone')); ?>" required>
                         </div>
                     </div>
@@ -74,7 +72,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" 
+                            <input type="email" class="form-control" id="email" name="email"
                                    value="<?php echo e(old('email')); ?>">
                         </div>
                         <div class="col-md-6">
@@ -115,7 +113,7 @@
                     <div class="row mb-4" id="balance-section" style="display: none;">
                         <div class="col-md-6">
                             <label for="balance" class="form-label">Initial Balance (LKR) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" id="balance" name="balance" 
+                            <input type="number" class="form-control" id="balance" name="balance"
                                    value="<?php echo e(old('balance', '0')); ?>" step="0.01" min="0">
                             <small class="text-muted">Enter the initial prepaid account balance</small>
                         </div>
@@ -125,7 +123,7 @@
                     <div class="alert alert-info" id="balance-info" style="display: none;">
                         <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Prepaid Balance Management</h6>
                         <p class="mb-0">
-                            <strong>Prepaid Account:</strong> Customer deposits money in advance. 
+                            <strong>Prepaid Account:</strong> Customer deposits money in advance.
                             When services are used, the amount is deducted from the prepaid balance.
                         </p>
                     </div>
@@ -145,7 +143,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Info Panel -->
     <div class="col-lg-4 col-xl-6">
         <div class="card border-0 bg-light">
@@ -183,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const balanceSection = document.getElementById('balance-section');
     const balanceInfo = document.getElementById('balance-info');
     const balanceInput = document.getElementById('balance');
-    
+
     function toggleBalanceField() {
         if (typeSelect.value === 'prepaid') {
             balanceSection.style.display = 'block';
@@ -199,13 +197,13 @@ document.addEventListener('DOMContentLoaded', function() {
             balanceInput.value = '0';
         }
     }
-    
+
     // Initial check
     toggleBalanceField();
-    
+
     // Listen for changes
     typeSelect.addEventListener('change', toggleBalanceField);
-    
+
     // Form validation
     const form = document.getElementById('createCompanyForm');
     form.addEventListener('submit', function(e) {
@@ -215,13 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const type = document.getElementById('type').value;
         const status = document.getElementById('status').value;
         const postoffice = document.getElementById('assign_postoffice').value;
-        
+
         if (!name || !telephone || !address || !type || !status || !postoffice) {
             e.preventDefault();
             alert('Please fill in all required fields.');
             return false;
         }
-        
+
         if (type === 'prepaid') {
             const balance = parseFloat(document.getElementById('balance').value);
             if (!balance || balance <= 0) {
@@ -231,7 +229,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-    
+
     // Telephone validation
     const telephoneInput = document.getElementById('telephone');
     telephoneInput.addEventListener('input', function(e) {
@@ -241,4 +239,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/companies/create.blade.php ENDPATH**/ ?>
