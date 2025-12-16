@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Add New Postman'); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -50,11 +48,11 @@
                 <div class="card-body">
                     <form action="<?php echo e(route('pm.postmen.store')); ?>" method="POST" novalidate>
                         <?php echo csrf_field(); ?>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" 
+                                <input type="text"
                                        class="form-control <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -62,11 +60,11 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                       id="name" 
-                                       name="name" 
-                                       value="<?php echo e(old('name')); ?>" 
-                                       placeholder="Enter full name" 
+unset($__errorArgs, $__bag); ?>"
+                                       id="name"
+                                       name="name"
+                                       value="<?php echo e(old('name')); ?>"
+                                       placeholder="Enter full name"
                                        required>
                                 <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -82,7 +80,7 @@ unset($__errorArgs, $__bag); ?>
 
                             <div class="col-md-6">
                                 <label for="nic" class="form-label">NIC Number <span class="text-danger">*</span></label>
-                                <input type="text" 
+                                <input type="text"
                                        class="form-control <?php $__errorArgs = ['nic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -90,12 +88,12 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                       id="nic" 
-                                       name="nic" 
-                                       value="<?php echo e(old('nic')); ?>" 
-                                       placeholder="1234567890" 
-                                       maxlength="10" 
+unset($__errorArgs, $__bag); ?>"
+                                       id="nic"
+                                       name="nic"
+                                       value="<?php echo e(old('nic')); ?>"
+                                       placeholder="1234567890"
+                                       maxlength="10"
                                        required>
                                 <?php $__errorArgs = ['nic'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -111,7 +109,7 @@ unset($__errorArgs, $__bag); ?>
 
                             <div class="col-md-6">
                                 <label for="mobile" class="form-label">Mobile Number <span class="text-danger">*</span></label>
-                                <input type="tel" 
+                                <input type="tel"
                                        class="form-control <?php $__errorArgs = ['mobile'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -119,11 +117,11 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                       id="mobile" 
-                                       name="mobile" 
-                                       value="<?php echo e(old('mobile')); ?>" 
-                                       placeholder="0771234567" 
+unset($__errorArgs, $__bag); ?>"
+                                       id="mobile"
+                                       name="mobile"
+                                       value="<?php echo e(old('mobile')); ?>"
+                                       placeholder="0771234567"
                                        required>
                                 <?php $__errorArgs = ['mobile'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -139,7 +137,7 @@ unset($__errorArgs, $__bag); ?>
 
                             <div class="col-md-6">
                                 <label for="paysheet_id" class="form-label">Paysheet ID</label>
-                                <input type="text" 
+                                <input type="text"
                                        class="form-control <?php $__errorArgs = ['paysheet_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -147,10 +145,10 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                       id="paysheet_id" 
-                                       name="paysheet_id" 
-                                       value="<?php echo e(old('paysheet_id')); ?>" 
+unset($__errorArgs, $__bag); ?>"
+                                       id="paysheet_id"
+                                       name="paysheet_id"
+                                       value="<?php echo e(old('paysheet_id')); ?>"
                                        placeholder="Optional paysheet ID">
                                 <?php $__errorArgs = ['paysheet_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -173,9 +171,9 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                        id="postman_type" 
-                                        name="postman_type" 
+unset($__errorArgs, $__bag); ?>"
+                                        id="postman_type"
+                                        name="postman_type"
                                         required>
                                     <option value="">Select postman type</option>
                                     <option value="permanent" <?php echo e(old('postman_type') === 'permanent' ? 'selected' : ''); ?>>
@@ -209,9 +207,9 @@ if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
-unset($__errorArgs, $__bag); ?>" 
-                                        id="status" 
-                                        name="status" 
+unset($__errorArgs, $__bag); ?>"
+                                        id="status"
+                                        name="status"
                                         required>
                                     <option value="">Select status</option>
                                     <option value="active" <?php echo e(old('status', 'active') === 'active' ? 'selected' : ''); ?>>
@@ -236,8 +234,8 @@ unset($__errorArgs, $__bag); ?>
 
                         <div class="alert alert-info mt-4">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Note:</strong> This postman will be assigned to your location 
-                            <strong>(<?php echo e(auth()->user()->location->name ?? 'Unknown Location'); ?>)</strong> 
+                            <strong>Note:</strong> This postman will be assigned to your location
+                            <strong>(<?php echo e(auth()->user()->location->name ?? 'Unknown Location'); ?>)</strong>
                             automatically.
                         </div>
 
@@ -305,10 +303,11 @@ unset($__errorArgs, $__bag); ?>
     .form-label {
         font-weight: 500;
     }
-    
+
     .text-danger {
         font-size: 0.875em;
     }
 </style>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('layouts.modern-pm', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\User\Desktop\NEW_ONE-main\resources\views/pm/postmen/create.blade.php ENDPATH**/ ?>
