@@ -1,5 +1,89 @@
 This is my personal project, and I completed the entire project by myself—from the initial idea and planning to the final implementation. I designed the structure, wrote all the code, and handled testing and improvements throughout the development process.
 
+## Installation
+
+### Prerequisites
+
+- PHP 8.2+
+- Composer
+- Node.js + npm
+- (Optional) SQLite or another database (MySQL/PostgreSQL)
+
+### Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Navoda-Perera/NEW_ONE-main.git
+   cd NEW_ONE-main
+   ```
+
+2. Install PHP dependencies:
+
+   ```bash
+   composer install
+   ```
+
+3. Create your environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Generate the application key:
+
+   ```bash
+   php artisan key:generate
+   ```
+
+5. Configure the database:
+
+   - **SQLite (default in `.env.example`)**
+
+     ```bash
+     touch database/database.sqlite
+     ```
+
+     Make sure your `.env` has:
+
+     ```env
+     DB_CONNECTION=sqlite
+     ```
+
+   - **Or use MySQL/PostgreSQL**: update `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` in `.env`.
+
+6. Run database migrations:
+
+   ```bash
+   php artisan migrate
+   ```
+
+7. Install frontend dependencies and build assets:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+8. Start the application:
+
+   - Simple:
+
+     ```bash
+     php artisan serve
+     ```
+
+   - Or run everything together (server + queue + logs + Vite):
+
+     ```bash
+     composer run dev
+     ```
+
+### (Optional) Seed the database
+
+```bash
+php artisan db:seed
+```
 
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
