@@ -1,5 +1,9 @@
 This is my personal project, and I completed the entire project by myself—from the initial idea and planning to the final implementation. I designed the structure, wrote all the code, and handled testing and improvements throughout the development process.
 
+## System Diagram
+![System Diagram](er1-postal.drawio.png)
+
+
 ## Installation
 
 ### Prerequisites
