@@ -1,3 +1,6 @@
+This is my personal project, and I completed the entire project by myself—from the initial idea and planning to the final implementation. I designed the structure, wrote all the code, and handled testing and improvements throughout the development process.
+
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
